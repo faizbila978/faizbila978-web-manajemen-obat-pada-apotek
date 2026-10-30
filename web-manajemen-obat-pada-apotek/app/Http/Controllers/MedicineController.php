@@ -18,11 +18,12 @@ class MedicineController extends Controller {
         return view('stok.index', compact('medicines'));
     }
 
-    // Menyimpan obat baru
+// Menyimpan obat baru beserta kandungan obatnya
     public function store(Request $request) {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'unit' => 'required|in:Botol,Tablet',
+            'nama_obat' => 'required|string|max:255',
+            'jenis' => 'required|string|max:255',
+            'kandungan' => 'required|string|max:255', // Validasi input kandungan
             'initial_stock' => 'required|integer|min:1',
             'expired_date' => 'required|date',
         ]);
@@ -31,16 +32,20 @@ class MedicineController extends Controller {
 
         DB::transaction(function () use ($request, $batchNumber) {
             $medicine = Medicine::create([
-                'name' => $request->name,
-                'active_ingredient' => $request->name, 
-                'category' => 'Umum',
-                'unit' => $request->unit,
-                'selling_price' => 0,
-                'total_stock' => $request->initial_stock,
+                'nama_obat' => $request->nama_obat,
+                'jenis' => $request->jenis,
+                'harga' => 0,
+                'stok' => $request->initial_stock,
+            ]);
+
+            // Simpan kandungan obat agar terbaca di skrining alergi
+            \App\Models\KandunganObat::create([
+                'id_obat' => $medicine->id_obat,
+                'nama_kandungan' => $request->kandungan,
             ]);
 
             MedicineBatch::create([
-                'medicine_id' => $medicine->id_obat,
+                'id_obat' => $medicine->id_obat,
                 'batch_number' => $batchNumber,
                 'initial_stock' => $request->initial_stock,
                 'current_stock' => $request->initial_stock,
@@ -50,13 +55,14 @@ class MedicineController extends Controller {
             ]);
         });
 
-        return redirect()->route('stok.index')->with('success', 'Obat baru berhasil ditambahkan!');
+        return redirect()->route('stok.index')->with('success', 'Obat baru beserta kandungan berhasil ditambahkan!');
     }
 
     // Mengurangi stok (Barang Keluar / Penjualan / Rusak dengan metode FIFO)
+    // Mengurangi stok (Barang Keluar / Penjualan / Rusak dengan metode FIFO)
     public function reduceStock(Request $request) {
         $request->validate([
-            'medicine_id' => 'required|exists:obats,id_obat',
+            'id_obat' => 'required|exists:obats,id_obat', // Sesuaikan name dari form modal (id_obat)
             'quantity' => 'required|integer|min:1',
         ]);
 
@@ -64,14 +70,15 @@ class MedicineController extends Controller {
         $warningMessage = null;
 
         DB::transaction(function () use ($request, $qtyToReduce, &$warningMessage) {
-            $medicine = Medicine::find($request->medicine_id);
+            $medicine = Medicine::find($request->id_obat);
 
-            if ($medicine->total_stock < $qtyToReduce) {
+            // Cek ketersediaan stok menggunakan kolom 'stok'
+            if ($medicine->stok < $qtyToReduce) {
                 throw new \Exception('Stok tidak mencukupi!');
             }
 
-            // Ambil batch berdasarkan sistem FIFO (Expired paling awal didahulukan)
-            $batches = MedicineBatch::where('medicine_id', $request->medicine_id)
+            // Ambil batch berdasarkan sistem FIFO menggunakan foreign key 'id_obat'
+            $batches = MedicineBatch::where('id_obat', $request->id_obat)
                                     ->where('current_stock', '>', 0)
                                     ->orderBy('expired_date', 'asc')
                                     ->get();
@@ -100,8 +107,8 @@ class MedicineController extends Controller {
                 }
             }
 
-            // Kurangi total stok utama
-            $medicine->total_stock -= $request->quantity;
+            // Kurangi total stok utama pada kolom 'stok'
+            $medicine->stok -= $request->quantity;
             $medicine->save();
         });
 
@@ -111,5 +118,21 @@ class MedicineController extends Controller {
         }
 
         return redirect()->route('stok.index')->with('success', $successMsg);
+    }
+    // Menghapus data obat secara total beserta batch dan kandungannya
+    public function destroy($id_obat)
+    {
+        DB::transaction(function () use ($id_obat) {
+            $medicine = Medicine::findOrFail($id_obat);
+            
+            // Hapus relasi terkait terlebih dahulu (jika ondelete cascade belum aktif di db)
+            $medicine->batches()->delete();
+            $medicine->kandungans()->delete();
+            
+            // Hapus data utama obat
+            $medicine->delete();
+        });
+
+        return redirect()->route('stok.index')->with('success', 'Data obat berhasil dihapus secara total!');
     }
 }

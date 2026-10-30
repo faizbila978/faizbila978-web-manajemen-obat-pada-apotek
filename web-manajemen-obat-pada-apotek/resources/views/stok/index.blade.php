@@ -39,6 +39,7 @@
     @endif
 
     <!-- Tabel Daftar Obat & Batch -->
+    <!-- Tabel Daftar Obat & Batch -->
     <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
         <table class="w-full text-left border-collapse">
             <thead>
@@ -46,20 +47,21 @@
                     <th class="p-4 font-semibold">Nama Obat</th>
                     <th class="p-4 font-semibold">Total Stok</th>
                     <th class="p-4 font-semibold">Detail Batch & Expired</th>
+                    <th class="p-4 font-semibold text-center">Aksi</th> <!-- Kolom Aksi -->
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 text-base">
                 @forelse($medicines as $med)
                 <tr class="hover:bg-gray-50">
-                    <!-- Kolom 1: Nama Obat & Satuan -->
+                    <!-- Kolom 1: Nama Obat & Jenis -->
                     <td class="p-4 font-bold text-gray-800">
-                        {{ $med->name }} <br>
-                        <span class="text-xs text-gray-500 font-normal">Bentuk: {{ $med->unit }}</span>
+                        {{ $med->nama_obat }} <br>
+                        <span class="text-xs text-gray-500 font-normal">Jenis: {{ $med->jenis }}</span>
                     </td>
                     
                     <!-- Kolom 2: Total Stok -->
                     <td class="p-4 font-bold text-[#0d2e26]">
-                        {{ $med->total_stock }} {{ $med->unit }}
+                        {{ $med->stok }}
                     </td>
                     
                     <!-- Kolom 3: Detail Batch & Expired -->
@@ -87,10 +89,21 @@
                             @endforeach
                         </div>
                     </td>
+
+                    <!-- Kolom 4: Tombol Hapus Total -->
+                    <td class="p-4 text-center">
+                        <form action="{{ route('stok.destroy', $med->id_obat) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus obat {{ $med->nama_obat }} beserta seluruh batch dan kandungannya secara total?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="px-3 py-1.5 bg-red-600 text-white rounded-xl text-xs font-medium hover:bg-red-700 transition shadow">
+                                Hapus Total
+                            </button>
+                        </form>
+                    </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="3" class="p-6 text-center text-gray-500">Belum ada data obat atau obat tidak ditemukan.</td>
+                    <td colspan="4" class="p-6 text-center text-gray-500">Belum ada data obat atau obat tidak ditemukan.</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -98,6 +111,7 @@
     </div>
 </div>
 
+<!-- Modal Form Tambah Obat Baru -->
 <!-- Modal Form Tambah Obat Baru -->
 <div id="modalTambahObat" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
     <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl relative">
@@ -108,15 +122,16 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nama Obat</label>
-                    <input type="text" name="name" required placeholder="Contoh: Paracetamol" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+                    <input type="text" name="nama_obat" required placeholder="Contoh: Paracetamol" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Bentuk / Satuan</label>
-                    <select name="unit" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none bg-white">
-                        <option value="">-- Pilih Bentuk --</option>
-                        <option value="Botol">Botol</option>
-                        <option value="Tablet">Tablet</option>
-                    </select>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jenis / Kategori</label>
+                    <input type="text" name="jenis" required placeholder="Contoh: Tablet / Botol" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kandungan Zat Aktif</label>
+                    <input type="text" name="kandungan" required placeholder="Contoh: Paracetamol" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+                    <span class="text-[10px] text-gray-400 mt-0.5 block">Digunakan untuk pencocokan skrining alergi pasien.</span>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Stok Awal</label>
@@ -136,7 +151,7 @@
     </div>
 </div>
 
-<!-- Modal Form Barang Keluar (Sederhana: Pilih Obat & Jumlah) -->
+<!-- Modal Form Barang Keluar -->
 <div id="modalBarangKeluar" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
     <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl relative">
         <h3 class="text-lg font-bold text-amber-700 mb-2">Form Barang Keluar</h3>
@@ -148,12 +163,12 @@
                 <!-- Pilih Obat -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Obat</label>
-                    <select name="medicine_id" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-amber-600 outline-none bg-white">
-                        <option value="">-- Pilih Obat --</option>
-                        @foreach($medicines as $m)
-                            <option value="{{ $m->id }}">{{ $m->name }} (Total Stok: {{ $m->total_stock }} {{ $m->unit }})</option>
-                        @endforeach
-                    </select>
+<select name="id_obat" required class="...">
+    <option value="">-- Pilih Obat --</option>
+    @foreach($medicines as $m)
+        <option value="{{ $m->id_obat }}">{{ $m->nama_obat }} (Total Stok: {{ $m->stok }})</option>
+    @endforeach
+</select>
                 </div>
 
                 <!-- Jumlah Keluar -->

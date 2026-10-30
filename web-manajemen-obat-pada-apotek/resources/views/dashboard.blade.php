@@ -3,7 +3,7 @@
 @section('content')
 <div class="p-8 bg-gray-50 min-h-screen">
     <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-3xl">
-        <h1 class="text-2xl font-bold text-[#0d2e26] mb-4">Selamat Datang di Sistem Apotek Aishwa</h1>
+        <h1 class="text-2xl font-bold text-[#0d2e26] mb-4">Selamat Datang di Sistem Apotek Farmasi 57</h1>
         <p class="text-gray-600 leading-relaxed mb-6">
             Panel utama untuk mengelola inventaris obat, memantau tanggal kadaluarsa (expired date), 
             melakukan skrining alergi pasien, serta memantau suhu ruangan gudang secara real-time.

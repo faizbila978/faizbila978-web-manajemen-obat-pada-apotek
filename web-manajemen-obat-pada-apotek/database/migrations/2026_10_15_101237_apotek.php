@@ -29,6 +29,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
+
         Schema::create('kandungan_obats', function (Blueprint $table) {
             $table->id('id_kandungan');
             $table->foreignId('id_obat')->constrained('obats', 'id_obat')->onDelete('cascade');
@@ -74,6 +75,17 @@ return new class extends Migration {
             $table->float('lembap_maksimal')->default(60.0);
             $table->timestamps();
         });
+        Schema::create('medicine_batches', function (Blueprint $table) {
+            $table->id(); // Primary key auto increment
+            $table->foreignId('id_obat')->constrained('obats', 'id_obat')->onDelete('cascade');
+            $table->string('batch_number');
+            $table->integer('initial_stock');
+            $table->integer('current_stock');
+            $table->date('expired_date');
+            $table->string('type');
+            $table->string('description')->nullable();
+            $table->timestamps();
+        });
     }
 
     public function down(): void {
@@ -86,5 +98,7 @@ return new class extends Migration {
         Schema::dropIfExists('obats');
         Schema::dropIfExists('alergi_pelanggans');
         Schema::dropIfExists('pelanggans');
+        Schema::dropIfExists('medicine_batches');
     }
+
 };

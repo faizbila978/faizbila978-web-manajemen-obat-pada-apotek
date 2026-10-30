@@ -8,23 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class MedicineBatch extends Model {
     use HasFactory;
 
+    protected $table = 'medicine_batches'; // Sesuaikan jika nama tabel di database berbeda (misal: 'batches' atau 'mutasi_stok')
+    protected $primaryKey = 'id'; // Sesuaikan primary key jika ada
+
     protected $fillable = [
-        'medicine_id', 
-        'batch_number', 
-        'initial_stock', 
-        'current_stock', 
-        'expired_date', 
-        'type', 
-        'description'
+        'id_obat', 'batch_number', 'initial_stock', 'current_stock', 'expired_date', 'type', 'description'
     ];
 
     public function medicine() {
-        return $this->belongsTo(Medicine::class);
-    }
-
-    // Scope untuk mendeteksi obat yang mendekati expired (misal < 60 hari)
-    public function scopeNearExpired($query) {
-        return $query->where('expired_date', '<=', now()->addDays(60))
-                     ->where('current_stock', '>', 0);
+        return $this->belongsTo(Medicine::class, 'id_obat', 'id_obat');
     }
 }
