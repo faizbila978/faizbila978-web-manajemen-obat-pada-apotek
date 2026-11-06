@@ -8,15 +8,15 @@
         <p class="text-xs text-gray-500 mb-6">Silakan masuk menggunakan akun terdaftar.</p>
 
         @if(session('success'))
-            <div class="mb-4 p-3 bg-emerald-50 text-emerald-800 text-xs rounded-xl border border-emerald-200">
-                {{ session('success') }}
-            </div>
+        <div class="mb-4 p-3 bg-emerald-50 text-emerald-800 text-xs rounded-xl border border-emerald-200">
+            {{ session('success') }}
+        </div>
         @endif
 
         @if($errors->any())
-            <div class="mb-4 p-3 bg-red-50 text-red-700 text-xs rounded-xl border border-red-200">
-                {{ $errors->first() }}
-            </div>
+        <div class="mb-4 p-3 bg-red-50 text-red-700 text-xs rounded-xl border border-red-200">
+            {{ $errors->first() }}
+        </div>
         @endif
 
         <form action="{{ route('login') }}" method="POST" class="space-y-4">

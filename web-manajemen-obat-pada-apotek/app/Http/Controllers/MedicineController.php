@@ -60,6 +60,7 @@ class MedicineController extends Controller {
 
     // Mengurangi stok (Barang Keluar / Penjualan / Rusak dengan metode FIFO)
     // Mengurangi stok (Barang Keluar / Penjualan / Rusak dengan metode FIFO)
+    // Mengurangi stok (Barang Keluar / Penjualan / Rusak dengan metode FIFO)
     public function reduceStock(Request $request) {
         $request->validate([
             'id_obat' => 'required|exists:obats,id_obat', // Sesuaikan name dari form modal (id_obat)
@@ -68,8 +69,9 @@ class MedicineController extends Controller {
 
         $qtyToReduce = $request->quantity;
         $warningMessage = null;
+        $isDeleted = false; // Flag untuk pesan notifikasi
 
-        DB::transaction(function () use ($request, $qtyToReduce, &$warningMessage) {
+        DB::transaction(function () use ($request, $qtyToReduce, &$warningMessage, &$isDeleted) {
             $medicine = Medicine::find($request->id_obat);
 
             // Cek ketersediaan stok menggunakan kolom 'stok'
@@ -110,29 +112,31 @@ class MedicineController extends Controller {
             // Kurangi total stok utama pada kolom 'stok'
             $medicine->stok -= $request->quantity;
             $medicine->save();
+
+            // === LOGIKA OTOMATIS HAPUS OBAT JIKA STOK HABIS (0) ===
+            if ($medicine->stok <= 0) {
+                // Hapus relasi terkait terlebih dahulu (batch dan kandungan)
+                $medicine->batches()->delete();
+                if (method_exists($medicine, 'kandungans')) {
+                    $medicine->kandungans()->delete();
+                }
+                
+                // Hapus data obat induknya
+                $medicine->delete();
+                $isDeleted = true;
+            }
         });
 
-        $successMsg = 'Barang keluar berhasil diproses!';
+        // Pesan sukses disesuaikan jika obat otomatis terhapus
+        $successMsg = $isDeleted 
+            ? 'Barang keluar diproses, stok habis dan obat berhasil dihapus dari sistem secara otomatis!' 
+            : 'Barang keluar berhasil diproses!';
+
         if ($warningMessage) {
             return redirect()->route('stok.index')->with('success', $successMsg)->with('error', $warningMessage);
         }
 
         return redirect()->route('stok.index')->with('success', $successMsg);
     }
-    // Menghapus data obat secara total beserta batch dan kandungannya
-    public function destroy($id_obat)
-    {
-        DB::transaction(function () use ($id_obat) {
-            $medicine = Medicine::findOrFail($id_obat);
-            
-            // Hapus relasi terkait terlebih dahulu (jika ondelete cascade belum aktif di db)
-            $medicine->batches()->delete();
-            $medicine->kandungans()->delete();
-            
-            // Hapus data utama obat
-            $medicine->delete();
-        });
 
-        return redirect()->route('stok.index')->with('success', 'Data obat berhasil dihapus secara total!');
-    }
 }
