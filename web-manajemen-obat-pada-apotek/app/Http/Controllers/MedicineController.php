@@ -30,8 +30,8 @@ class MedicineController extends Controller {
         $request->validate([
             'nama_obat' => 'required|string|max:255',
             'jenis' => 'required|string|max:255',
-            'kategori' => 'required|string|max:255', // Pastikan validasi kategori ada
-            'kandungan_obat' => 'required|string|max:255', // Validasi input kandungan
+            'kategori' => 'required|string|max:255',
+            'kandungan' => 'required|string|max:255', // Validasi input kandungan
             'alergi' => 'required|string|max:255',
             'initial_stock' => 'required|integer|min:1',
             'expired_date' => 'required|date',
@@ -55,7 +55,7 @@ class MedicineController extends Controller {
             // Simpan kandungan obat
             \App\Models\KandunganObat::create([
                 'id_obat' => $medicineId,
-                'kandungan_obat' => $request->kandungan_obat,
+                'nama_kandungan' => $request->kandungan,
             ]);
 
             MedicineBatch::create([
@@ -74,7 +74,6 @@ class MedicineController extends Controller {
 
     // Mengurangi stok (Barang Keluar / Penjualan / Rusak dengan metode FIFO)
     // Mengurangi stok (Barang Keluar / Penjualan / Rusak dengan metode FIFO)
-    // Mengurangi stok (Barang Keluar / Penjualan / Rusak dengan metode FIFO)
     public function reduceStock(Request $request) {
         $request->validate([
             'id_obat' => 'required|exists:obats,id_obat', // Sesuaikan name dari form modal (id_obat)
@@ -83,9 +82,8 @@ class MedicineController extends Controller {
 
         $qtyToReduce = $request->quantity;
         $warningMessage = null;
-        $isDeleted = false; // Flag untuk pesan notifikasi
 
-        DB::transaction(function () use ($request, $qtyToReduce, &$warningMessage, &$isDeleted) {
+        DB::transaction(function () use ($request, $qtyToReduce, &$warningMessage) {
             $medicine = Medicine::find($request->id_obat);
 
             // Cek ketersediaan stok menggunakan kolom 'stok'
@@ -126,26 +124,9 @@ class MedicineController extends Controller {
             // Kurangi total stok utama pada kolom 'stok'
             $medicine->stok -= $request->quantity;
             $medicine->save();
-
-            // === LOGIKA OTOMATIS HAPUS OBAT JIKA STOK HABIS (0) ===
-            if ($medicine->stok <= 0) {
-                // Hapus relasi terkait terlebih dahulu (batch dan kandungan)
-                $medicine->batches()->delete();
-                if (method_exists($medicine, 'kandungans')) {
-                    $medicine->kandungans()->delete();
-                }
-                
-                // Hapus data obat induknya
-                $medicine->delete();
-                $isDeleted = true;
-            }
         });
 
-        // Pesan sukses disesuaikan jika obat otomatis terhapus
-        $successMsg = $isDeleted 
-            ? 'Barang keluar diproses, stok habis dan obat berhasil dihapus dari sistem secara otomatis!' 
-            : 'Barang keluar berhasil diproses!';
-
+        $successMsg = 'Barang keluar berhasil diproses!';
         if ($warningMessage) {
             return redirect()->route('stok.index')->with('success', $successMsg)->with('error', $warningMessage);
         }
@@ -160,10 +141,12 @@ class MedicineController extends Controller {
             
             // Hapus relasi terkait terlebih dahulu (jika ondelete cascade belum aktif di db)
             $medicine->batches()->delete();
-            $medicine->kandungan()->delete();
+            $medicine->kandungans()->delete();
             
             // Hapus data utama obat
             $medicine->delete();
         });
 
+        return redirect()->route('stok.index')->with('success', 'Data obat berhasil dihapus secara total!');
+    }
 }
