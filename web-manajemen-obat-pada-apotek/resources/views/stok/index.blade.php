@@ -121,9 +121,16 @@
                     @endforeach
                     </td>
 
-                    <!-- Kolom 8: Tombol Hapus Total -->
-                    <td class="p-4 text-center">
-                        <form action="{{ route('stok.destroy', $med->id_obat) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus obat {{ $med->nama_obat }} beserta seluruh batch dan kandungannya secara total?');">
+                   <!-- Kolom Aksi -->
+                    <td class="p-4 text-center flex items-center justify-center gap-2">
+                        <!-- Tombol Edit -->
+                        <button onclick="openModalEdit('{{ $med->id_obat }}', '{{ $med->nama_obat }}', '{{ $med->jenis }}', '{{ $med->kategori }}', '{{ addslashes($med->kandungan->pluck('nama_kandungan')->implode(', ')) }}', '{{ $med->alergi }}', '{{ $med->stok }}')" 
+                            class="px-3 py-1.5 bg-blue-600 text-white rounded-xl text-xs font-medium hover:bg-blue-700 transition shadow">
+                            Edit
+                        </button>
+
+                        <!-- Tombol Hapus Total -->
+                        <form action="{{ route('stok.destroy', $med->id_obat) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus obat ini?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="px-3 py-1.5 bg-red-600 text-white rounded-xl text-xs font-medium hover:bg-red-700 transition shadow">
@@ -161,11 +168,11 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                    <input type="text" name="jenis" required placeholder="Contoh: Demam / Ruam" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+                    <input type="text" name="kategori" required placeholder="Contoh: Demam / Ruam" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Kandungan Obat</label>
-                    <input type="text" name="kandungan" required placeholder="" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+                    <input type="text" name="kandungan_obat" required placeholder="" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
                 </div>
 
                 <div>
@@ -176,8 +183,9 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Stok</label>
-                    <input type="number" name="initial_stock" min="1" required placeholder="Contoh: 50" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+                    <input type="number" id="edit_stok" name="stok" min="0" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kadaluarsa (Expired)</label>
                     <input type="date" name="expired_date" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
@@ -237,6 +245,51 @@
     </div>
 </div>
 
+<!-- Modal Form Edit Obat -->
+<!-- Modal Form Edit Obat -->
+<div id="modalEditObat" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl relative">
+        <h3 class="text-lg font-bold text-[#0d2e26] mb-4">Edit Data & Stok Obat</h3>
+        
+        <form id="formEditObat" method="POST">
+            @csrf
+            @method('PUT')
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Obat</label>
+                    <input type="text" id="edit_nama_obat" name="nama_obat" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jenis</label>
+                    <input type="text" id="edit_jenis" name="jenis" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                    <input type="text" id="edit_kategori" name="kategori" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kandungan Obat</label>
+                    <input type="text" id="edit_kandungan" name="kandungan" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Alergi</label>
+                    <input type="text" id="edit_alergi" name="alergi" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+                </div>
+                <!-- PASTIKAN BAGIAN INI ADA DI FILE BLADE ANDA -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Stok</label>
+                    <input type="number" id="edit_stok" name="stok" min="0" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-6">
+                <button type="button" onclick="closeModalEdit()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition">Batal</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Script Modal & Interaksi -->
 <script>
     function openModalTambah() {
@@ -256,5 +309,24 @@
         document.getElementById('modalBarangKeluar').classList.remove('flex');
         document.getElementById('modalBarangKeluar').classList.add('hidden');
     }
-</script>
+    // ---> EDIT DI SINI <---
+    function openModalEdit(id, nama, jenis, kategori, kandungan, alergi, stok) {
+    document.getElementById('formEditObat').action = '/stok/' + id;
+    
+    document.getElementById('edit_nama_obat').value = nama;
+    document.getElementById('edit_jenis').value = jenis;
+    document.getElementById('edit_kategori').value = kategori;
+    document.getElementById('edit_kandungan').value = kandungan;
+    document.getElementById('edit_alergi').value = alergi;
+    document.getElementById('edit_stok').value = stok; // Masukkan nilai stok
+
+    document.getElementById('modalEditObat').classList.remove('hidden');
+    document.getElementById('modalEditObat').classList.add('flex');
+    }
+
+    function closeModalEdit() {
+        document.getElementById('modalEditObat').classList.remove('flex');
+        document.getElementById('modalEditObat').classList.add('hidden');
+    }
+    </script>
 @endsection

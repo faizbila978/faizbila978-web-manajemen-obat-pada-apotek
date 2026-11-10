@@ -49,5 +49,13 @@
             @endif
         </a>
 
+        <!-- Form Tombol Logout -->
+        <form action="{{ route('logout') }}" method="POST" class="mt-4">
+            @csrf
+            <button type="submit" class="w-full text-left py-2 px-4 rounded-xl text-red-300 hover:bg-red-600/20 hover:text-red-200 transition flex items-center gap-2">
+                <span>🚪</span> Logout
+            </button>
+        </form>
+
     </nav>
 </aside>

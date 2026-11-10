@@ -17,14 +17,17 @@ Route::middleware('guest')->group(function () {
 
 // Semua halaman yang wajib login
 Route::middleware('auth')->group(function () {
-    // Dashboard
+    // Dashboard (Bisa diakses via / atau /dashboard)
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 
-    // Stok & Mutasi (form pakai modal, jadi show/create/edit dikecualikan)
+    // Stok & Mutasi
     Route::resource('stok', MedicineController::class)
         ->except(['show', 'create', 'edit'])
         ->parameters(['stok' => 'id_obat']);
+    
     Route::post('/stok/reduce', [MedicineController::class, 'reduceStock'])->name('stok.reduce');
+    Route::put('/stok/{id}', [MedicineController::class, 'update'])->name('stok.update');
 
     // Skrining Alergi
     Route::get('/skrining', [AllergyScreeningController::class, 'index'])->name('skrining.index');

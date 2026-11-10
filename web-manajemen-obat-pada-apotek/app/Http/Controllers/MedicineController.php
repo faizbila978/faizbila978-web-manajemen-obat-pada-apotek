@@ -31,7 +31,7 @@ class MedicineController extends Controller {
             'nama_obat' => 'required|string|max:255',
             'jenis' => 'required|string|max:255',
             'kategori' => 'required|string|max:255',
-            'kandungan' => 'required|string|max:255', // Validasi input kandungan
+            'kandungan_obat' => 'required|string|max:255', // Validasi input kandungan
             'alergi' => 'required|string|max:255',
             'initial_stock' => 'required|integer|min:1',
             'expired_date' => 'required|date',
@@ -133,6 +133,48 @@ class MedicineController extends Controller {
 
         return redirect()->route('stok.index')->with('success', $successMsg);
     }
+
+        // Memperbarui data obat
+    public function update(Request $request, $id_obat)
+    {
+        $request->validate([
+            'nama_obat' => 'required|string|max:255',
+            'jenis' => 'required|string|max:255',
+            'kategori' => 'required|string|max:255',
+            'kandungan' => 'required|string|max:255',
+            'alergi' => 'required|string|max:255',
+            'stok' => 'required|integer|min:0'
+        ]);
+
+        DB::transaction(function () use ($request, $id_obat) {
+            $medicine = Medicine::findOrFail($id_obat);
+            
+            // Update data utama obat
+            $medicine->update([
+                'nama_obat' => $request->nama_obat,
+                'jenis' => $request->jenis,
+                'kategori' => $request->kategori,
+                'alergi' => $request->alergi,
+                'stok' => $request->stok,
+            ]);
+
+            // Update kandungan obat (jika ada relasi)
+            $medicine->kandungan()->update([
+                'nama_kandungan' => $request->kandungan,
+            ]);
+            // Opsional: Jika ingin mengupdate stok pada batch terdepan/pertama
+        $batch = $medicine->batches()->orderBy('expired_date', 'asc')->first();
+        if ($batch) {
+            $batch->update([
+                'initial_stock' => $request->stok,
+                'current_stock' => $request->stok,
+            ]);
+        }
+    });
+
+    return redirect()->route('stok.index')->with('success', 'Data obat dan stok berhasil diperbarui!');
+}
+
     // Menghapus data obat secara total beserta batch dan kandungannya
     public function destroy($id_obat)
     {
@@ -141,7 +183,7 @@ class MedicineController extends Controller {
             
             // Hapus relasi terkait terlebih dahulu (jika ondelete cascade belum aktif di db)
             $medicine->batches()->delete();
-            $medicine->kandungans()->delete();
+            $medicine->kandungan()->delete();
             
             // Hapus data utama obat
             $medicine->delete();
