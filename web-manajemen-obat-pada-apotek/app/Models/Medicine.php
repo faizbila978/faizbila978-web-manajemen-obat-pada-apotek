@@ -12,10 +12,15 @@ class Medicine extends Model {
     protected $primaryKey = 'id_obat';
 
     protected $fillable = [
-        'nama_obat', 'jenis', 'stok', 'harga'
+        'nama_obat', 'jenis', 'kategori', 'alergi', 'stok', 'harga' // <-- Pastikan 'kategori' ada di fillable
     ];
 
     public function batches() {
         return $this->hasMany(MedicineBatch::class, 'id_obat', 'id_obat');
+    }
+
+    // Relasi ke kandungan obat
+    public function kandungan() {
+        return $this->hasMany(KandunganObat::class, 'id_obat', 'id_obat');
     }
 }

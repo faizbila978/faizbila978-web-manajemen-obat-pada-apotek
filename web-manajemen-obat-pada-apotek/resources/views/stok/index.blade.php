@@ -20,12 +20,12 @@
                        class="w-full px-4 py-2.5 bg-white/80 backdrop-blur-xs border border-gray-200/80 rounded-2xl text-sm text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0F766E] shadow-xs transition">
             </form>
 
-            <!-- Tombol Barang Keluar (Oranye lebih gelap agar kontras teks putih optimal) -->
+            <!-- Tombol Barang Keluar -->
             <button onclick="openModalKeluar()" class="bg-gradient-to-r from-amber-600 to-amber-700 text-white px-5 py-2.5 rounded-2xl shadow-md shadow-amber-700/20 hover:from-amber-700 hover:to-amber-800 hover:shadow-lg transition-all duration-200 font-medium text-sm whitespace-nowrap">
                 - Barang Keluar
             </button>
 
-            <!-- Tombol Tambah Obat Baru dengan Gradasi Teal Fresh (#0F766E -> #115E59) -->
+            <!-- Tombol Tambah Obat Baru dengan Gradasi Teal Fresh -->
             <button onclick="openModalTambah()" class="bg-gradient-to-br from-[#0F766E] to-[#115E59] text-white px-5 py-2.5 rounded-2xl shadow-md shadow-[#0F766E]/20 hover:from-[#0d665f] hover:to-[#0e4f4c] hover:shadow-lg transition-all duration-200 font-medium text-sm whitespace-nowrap">
                 + Tambah Obat Baru
             </button>
@@ -55,28 +55,38 @@
                 <!-- Header tabel dengan gradasi halus -->
                 <tr class="bg-gradient-to-r from-gray-50 via-gray-100/50 to-gray-50 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-100">
                     <th class="p-5 font-semibold">Nama Obat</th>
+                    <th class="p-5 font-semibold">Jenis</th>
+                    <th class="p-5 font-semibold">Kategori</th>
                     <th class="p-5 font-semibold">Total Stok</th>
                     <th class="p-5 font-semibold">Detail Batch & Expired</th>
-
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 text-base">
                 @forelse($medicines as $med)
                 <tr class="hover:bg-gradient-to-r hover:from-teal-50/20 hover:to-transparent transition-colors duration-150">
-                    <!-- Kolom 1: Nama Obat & Jenis -->
+                    <!-- Kolom 1: Nama Obat -->
                     <td class="p-5 font-bold text-gray-800">
-                        {{ $med->nama_obat }} <br>
-                        <span class="text-xs text-gray-500 font-normal">Jenis: {{ $med->jenis }}</span>
+                        {{ $med->nama_obat }}
+                    </td>
+
+                    <!-- Kolom 2: Jenis -->
+                    <td class="p-5 text-gray-600">
+                        {{ $med->jenis }}
+                    </td>
+
+                    <!-- Kolom 3: Kategori -->
+                    <td class="p-5 text-gray-600">
+                        {{ $med->kategori }}
                     </td>
                     
-                    <!-- Kolom 2: Total Stok -->
+                    <!-- Kolom 4: Total Stok -->
                     <td class="p-5 font-bold text-[#0F766E]">
                         <span class="bg-gradient-to-r from-[#0F766E] to-[#115E59] bg-clip-text text-transparent">
                             {{ $med->stok }}
                         </span>
                     </td>
                     
-                    <!-- Kolom 3: Detail Batch & Expired -->
+                    <!-- Kolom 5: Detail Batch & Expired -->
                     <td class="p-5">
                         <div class="flex flex-wrap gap-2">
                             @foreach($med->batches->where('current_stock', '>', 0) as $batch)
@@ -101,12 +111,10 @@
                             @endforeach
                         </div>
                     </td>
-
                 </tr>
                 @empty
                 <tr>
-
-                    <td colspan="4" class="p-8 text-center text-gray-500">Belum ada data obat atau obat tidak ditemukan.</td>
+                    <td colspan="5" class="p-8 text-center text-gray-500">Belum ada data obat atau obat tidak ditemukan.</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -127,8 +135,12 @@
                     <input type="text" name="nama_obat" required placeholder="Contoh: Paracetamol" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-2xl text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-[#0F766E] outline-none transition text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Jenis / Kategori</label>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Jenis</label>
                     <input type="text" name="jenis" required placeholder="Contoh: Tablet / Botol" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-2xl text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-[#0F766E] outline-none transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Kategori</label>
+                    <input type="text" name="kategori" required placeholder="Contoh: Analgesik" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-2xl text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-[#0F766E] outline-none transition text-sm">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Kandungan Zat Aktif</label>
@@ -141,7 +153,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Tanggal Kadaluarsa (Expired)</label>
-                    <input type="date" name="expired_date" required class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-2xl text-gray-800 focus:ring-2 focus:ring-[#0F766E] outline-none transition text-sm text-gray-700">
+                    <input type="date" name="expired_date" required class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-2xl text-gray-800 focus:ring-2 focus:ring-[#0F766E] outline-none transition text-sm">
                 </div>
             </div>
 
@@ -160,52 +172,55 @@
         <p class="text-xs text-gray-600 mb-6 leading-relaxed">Sistem akan otomatis mengeluarkan stok menggunakan metode FIFO berdasarkan tanggal expired terdekat.</p>
         
         <form action="{{ route('stok.reduce') }}" method="POST" onsubmit="return konfirmasiKeluar()">
-    @csrf
-    <div class="space-y-4">
-        <!-- Pilih Obat -->
-        <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Pilih Obat</label>
-            <select name="id_obat" id="selectObatKeluar" required onchange="updateModeKeluar()" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-amber-600 outline-none transition text-sm text-gray-800">
-                <option value="" data-stok="0">-- Pilih Obat --</option>
-                @foreach($medicines as $m)
-                    <option value="{{ $m->id_obat }}" data-stok="{{ $m->stok }}">{{ $m->nama_obat }} (Total Stok: {{ $m->stok }})</option>
-                @endforeach
-            </select>
-        </div>
+            @csrf
+            <div class="space-y-4">
+                <!-- Pilih Obat -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Pilih Obat</label>
+                    <select name="id_obat" id="selectObatKeluar" required onchange="updateModeKeluar()" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-amber-600 outline-none transition text-sm text-gray-800">
+                        <option value="" data-stok="0">-- Pilih Obat --</option>
+                        @foreach($medicines as $m)
+                            <option value="{{ $m->id_obat }}" data-stok="{{ $m->stok }}">{{ $m->nama_obat }} (Total Stok: {{ $m->stok }})</option>
+                        @endforeach
+                    </select>
+                </div>
 
-        <!-- Pilih Mode -->
-        <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Mode Pengeluaran</label>
-            <div class="grid grid-cols-2 gap-2">
-                <label class="cursor-pointer">
-                    <input type="radio" name="mode" value="manual" class="peer hidden" checked onchange="updateModeKeluar()">
-                    <div class="text-center px-3 py-2.5 rounded-2xl border border-gray-200 bg-white text-sm text-gray-700 peer-checked:border-amber-600 peer-checked:bg-amber-50 peer-checked:text-amber-800 peer-checked:font-semibold transition">
-                        Ketik Manual
+                <!-- Pilih Mode -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Mode Pengeluaran</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="mode" value="manual" class="peer hidden" checked onchange="updateModeKeluar()">
+                            <div class="text-center px-3 py-2.5 rounded-2xl border border-gray-200 bg-white text-sm text-gray-700 peer-checked:border-amber-600 peer-checked:bg-amber-50 peer-checked:text-amber-800 peer-checked:font-semibold transition">
+                                Ketik Manual
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="mode" value="semua" class="peer hidden" onchange="updateModeKeluar()">
+                            <div class="text-center px-3 py-2.5 rounded-2xl border border-gray-200 bg-white text-sm text-gray-700 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-700 peer-checked:font-semibold transition">
+                                Hapus Semua Stok
+                            </div>
+                        </label>
                     </div>
-                </label>
-                <label class="cursor-pointer">
-                    <input type="radio" name="mode" value="semua" class="peer hidden" onchange="updateModeKeluar()">
-                    <div class="text-center px-3 py-2.5 rounded-2xl border border-gray-200 bg-white text-sm text-gray-700 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-700 peer-checked:font-semibold transition">
-                        Hapus Semua Stok
-                    </div>
-                </label>
+                </div>
+
+                <!-- Jumlah Keluar -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Jumlah Keluar / Qty</label>
+                    <input type="number" name="quantity" id="inputQtyKeluar" min="1" required placeholder="Contoh: 5" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-2xl text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-amber-600 outline-none transition text-sm read-only:bg-gray-100 read-only:text-gray-500">
+                    <span id="infoHapusSemua" class="hidden text-[11px] text-red-600 mt-1 block">Seluruh stok obat ini akan dikeluarkan (FIFO).</span>
+                </div>
             </div>
-        </div>
 
-        <!-- Jumlah Keluar -->
-        <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Jumlah Keluar / Qty</label>
-            <input type="number" name="quantity" id="inputQtyKeluar" min="1" required placeholder="Contoh: 5" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-2xl text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-amber-600 outline-none transition text-sm read-only:bg-gray-100 read-only:text-gray-500">
-            <span id="infoHapusSemua" class="hidden text-[11px] text-red-600 mt-1 block">Seluruh stok obat ini akan dikeluarkan (FIFO).</span>
-        </div>
+            <div class="flex justify-end gap-3 mt-8">
+                <button type="button" onclick="closeModalKeluar()" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-2xl hover:bg-gray-200 transition font-medium text-sm">Batal</button>
+                <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-2xl hover:from-amber-700 hover:to-amber-800 transition font-medium text-sm shadow-md shadow-amber-700/10">Proses Pengurangan</button>
+            </div>
+        </form>
     </div>
+</div>
 
-    <div class="flex justify-end gap-3 mt-8">
-        <button type="button" onclick="closeModalKeluar()" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-2xl hover:bg-gray-200 transition font-medium text-sm">Batal</button>
-        <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-2xl hover:from-amber-700 hover:to-amber-800 transition font-medium text-sm shadow-md shadow-amber-700/10">Proses Pengurangan</button>
-    </div>
-</form><!-- Script Modal & Interaksi -->
-
+<!-- Script Modal & Interaksi -->
 <script>
     function openModalTambah() {
         document.getElementById('modalTambahObat').classList.remove('hidden');
@@ -223,6 +238,31 @@
     function closeModalKeluar() {
         document.getElementById('modalBarangKeluar').classList.remove('flex');
         document.getElementById('modalBarangKeluar').classList.add('hidden');
+    }
+
+    function updateModeKeluar() {
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+        const inputQty = document.getElementById('inputQtyKeluar');
+        const infoHapus = document.getElementById('infoHapusSemua');
+
+        if (mode === 'semua') {
+            inputQty.value = '';
+            inputQty.setAttribute('readonly', true);
+            inputQty.removeAttribute('required');
+            infoHapus.classList.remove('hidden');
+        } else {
+            inputQty.removeAttribute('readonly');
+            inputQty.setAttribute('required', 'required');
+            infoHapus.classList.add('hidden');
+        }
+    }
+
+    function konfirmasiKeluar() {
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+        if (mode === 'semua') {
+            return confirm('Apakah Anda yakin ingin mengeluarkan/menghapus seluruh stok obat ini secara FIFO?');
+        }
+        return true;
     }
 </script>
 @endsection

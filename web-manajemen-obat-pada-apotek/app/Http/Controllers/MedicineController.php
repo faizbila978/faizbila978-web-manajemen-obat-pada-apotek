@@ -10,12 +10,19 @@ use Illuminate\Support\Str;
 
 class MedicineController extends Controller {
     // Menampilkan daftar stok obat dan status batch/expired-nya
-    public function index() {
-        $medicines = Medicine::with(['batches' => function($query) {
-            $query->orderBy('expired_date', 'asc');
-        }])->get();
+   public function index(Request $request) {
+    $search = $request->input('search');
 
-        return view('stok.index', compact('medicines'));
+    $medicines = Medicine::with(['batches' => function($query) {
+        $query->orderBy('expired_date', 'asc');
+    }])
+    ->when($search, function ($query, $search) {
+        // Filter berdasarkan nama obat (menggunakan LIKE agar pencarian lebih fleksibel)
+        return $query->where('nama_obat', 'like', '%' . $search . '%');
+    })
+    ->get();
+
+    return view('stok.index', compact('medicines'));
     }
 
 // Menyimpan obat baru beserta kandungan obatnya
@@ -23,7 +30,9 @@ class MedicineController extends Controller {
         $request->validate([
             'nama_obat' => 'required|string|max:255',
             'jenis' => 'required|string|max:255',
-            'kandungan' => 'required|string|max:255', // Validasi input kandungan
+            'kategori' => 'required|string|max:255', // Pastikan validasi kategori ada
+            'kandungan_obat' => 'required|string|max:255', // Validasi input kandungan
+            'alergi' => 'required|string|max:255',
             'initial_stock' => 'required|integer|min:1',
             'expired_date' => 'required|date',
         ]);
@@ -34,18 +43,23 @@ class MedicineController extends Controller {
             $medicine = Medicine::create([
                 'nama_obat' => $request->nama_obat,
                 'jenis' => $request->jenis,
+                'kategori' => $request->kategori,
+                'alergi' => $request->alergi,
                 'harga' => 0,
                 'stok' => $request->initial_stock,
             ]);
 
-            // Simpan kandungan obat agar terbaca di skrining alergi
+            // Gunakan $medicine->id (atau sesuaikan jika primary key tabel obat Anda memang id_obat)
+            $medicineId = $medicine->id ?? $medicine->id_obat;
+
+            // Simpan kandungan obat
             \App\Models\KandunganObat::create([
-                'id_obat' => $medicine->id_obat,
-                'nama_kandungan' => $request->kandungan,
+                'id_obat' => $medicineId,
+                'kandungan_obat' => $request->kandungan_obat,
             ]);
 
             MedicineBatch::create([
-                'id_obat' => $medicine->id_obat,
+                'id_obat' => $medicineId,
                 'batch_number' => $batchNumber,
                 'initial_stock' => $request->initial_stock,
                 'current_stock' => $request->initial_stock,
@@ -138,5 +152,18 @@ class MedicineController extends Controller {
 
         return redirect()->route('stok.index')->with('success', $successMsg);
     }
+    // Menghapus data obat secara total beserta batch dan kandungannya
+    public function destroy($id_obat)
+    {
+        DB::transaction(function () use ($id_obat) {
+            $medicine = Medicine::findOrFail($id_obat);
+            
+            // Hapus relasi terkait terlebih dahulu (jika ondelete cascade belum aktif di db)
+            $medicine->batches()->delete();
+            $medicine->kandungan()->delete();
+            
+            // Hapus data utama obat
+            $medicine->delete();
+        });
 
 }

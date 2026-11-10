@@ -20,31 +20,31 @@
             <form action="{{ route('skrining.index') }}" method="GET">
     <div class="space-y-4">
         <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Nama Pelanggan / Pasien</label>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Nama Pelanggan </label>
             <input type="text" name="nama_pelanggan" value="{{ $namaPelanggan ?? '' }}" required placeholder="Contoh: Budi Santoso" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#0d2e26]">
         </div>
 
         <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Riwayat Alergi (Pisahkan koma)</label>
-            <input type="text" name="nama_alergi" value="{{ $namaAlergiInput ?? '' }}" placeholder="Contoh: Paracetamol" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#0d2e26]">
+            <label class="block text-xs font-medium text-gray-700 mb-1">Riwayat Alergi </label>
+            <input type="text" name="nama_alergi" value="{{ $namaAlergiInput ?? '' }}" placeholder="" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#0d2e26]">
         </div>
 
         <!-- Tambahan Input Keluhan / Gejala / Indikasi -->
         <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Cari Keluhan / Indikasi Obat</label>
-            <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="Contoh: Demam, Batuk, Flu" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#0d2e26]">
+            <label class="block text-xs font-medium text-gray-700 mb-1">Nama Obat</label>
+            <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#0d2e26]">
             <span class="text-[10px] text-gray-400 mt-1 block">Kosongkan jika ingin melihat semua obat.</span>
         </div>
 
         <button type="submit" class="w-full py-2.5 bg-[#0d2e26] text-white rounded-xl text-sm font-medium hover:bg-[#133d33] transition shadow">
-            🔍 Cari Obat Alternatif Aman
+            🔍 Pengecekan Obat
         </button>
     </div>
 </form>
 
             <!-- Bagian Daftar Pasien Tersimpan (Riwayat Cepat) -->
             <div class="border-t pt-4">
-                <h4 class="text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Pasien Yang Sering Di-skrining:</h4>
+                <h4 class="text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Riwayat Pelanggan</h4>
                 <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
                     @php
                         $listPelanggan = \App\Models\Pelanggan::with('alergis')->latest()->take(5)->get();
@@ -71,7 +71,7 @@
 
         <!-- Kolom Kanan: Hasil Pencocokan Keamanan Obat -->
         <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h3 class="text-lg font-bold text-[#0d2e26] mb-4">Hasil Pencocokan Keamanan Obat</h3>
+            <h3 class="text-lg font-bold text-[#0d2e26] mb-4">Hasil Pengecekan Obat</h3>
 
             @if(isset($namaPelanggan) && !empty($namaPelanggan))
                 <div class="mb-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
@@ -90,7 +90,7 @@
                             <tr class="bg-gray-100 text-gray-700 text-xs uppercase tracking-wider">
                                 <th class="p-3 font-semibold">Nama Obat</th>
                                 <th class="p-3 font-semibold">Kandungan Zat Aktif</th>
-                                <th class="p-3 font-semibold">Stok & Harga</th>
+                                <th class="p-3 font-semibold">Stok </th>
                                 <th class="p-3 font-semibold">Status Skrining</th>
                             </tr>
                         </thead>
@@ -103,7 +103,6 @@
                                 </td>
                                 <td class="p-3 text-gray-700">
                                     Stok: <b>{{ $res['obat']->stok }}</b><br>
-                                    <span class="text-xs text-gray-500">Rp {{ number_format($res['obat']->harga, 0, ',', '.') }}</span>
                                 </td>
                                 <td class="p-3">
                                     @if($res['is_safe'])
