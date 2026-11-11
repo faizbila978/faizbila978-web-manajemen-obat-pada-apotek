@@ -39,7 +39,6 @@
     @endif
 
     <!-- Tabel Daftar Obat & Batch -->
-    <!-- Tabel Daftar Obat & Batch -->
     <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
         <table class="w-full text-left border-collapse">
             <thead>
@@ -149,7 +148,6 @@
     </div>
 </div>
 
-<!-- Modal Form Tambah Obat Baru -->
 <!-- Modal Form Tambah Obat Baru -->
 <div id="modalTambahObat" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
     <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl relative">

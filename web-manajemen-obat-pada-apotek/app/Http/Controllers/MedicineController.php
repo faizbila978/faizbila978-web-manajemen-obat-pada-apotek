@@ -27,6 +27,7 @@ class MedicineController extends Controller {
 
 // Menyimpan obat baru beserta kandungan obatnya
     public function store(Request $request) {
+        dd($request->all());
         $request->validate([
             'nama_obat' => 'required|string|max:255',
             'jenis' => 'required|string|max:255',

@@ -5,20 +5,27 @@
     <!-- Header & Tombol Simulasi -->
     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-[#0d2e26]">Monitoring Suhu & Kelembapan Gudang</h1>
-            <p class="text-xs text-gray-500 mt-1">Pemantauan real-time kondisi lingkungan penyimpanan obat berdasarkan sensor IoT.</p>
+            <h1 class="text-2xl font-bold text-[#0d2e26]">Monitoring Suhu & Kelembapan Ruangan</h1>
+            <p class="text-xs text-gray-500 mt-1">Pemantauan real-time kondisi lingkungan penyimpanan obat berbasis sensor IoT (ESP32).</p>
         </div>
         
-        
+        <!-- Tombol Simulasi Data Sensor IoT -->
+        <form action="{{ route('monitoring.simulate') }}" method="POST">
+            @csrf
+            <button type="submit" class="bg-[#0d2e26] text-white px-4 py-2.5 rounded-xl shadow hover:bg-[#133d33] transition font-medium text-sm flex items-center gap-2 whitespace-nowrap">
+                <span>🔄</span> Simulasi Data Sensor IoT
+            </button>
+        </form>
     </div>
 
+    <!-- Alert Notifikasi Sukses -->
     @if(session('success'))
         <div class="mb-4 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-sm">
             {{ session('success') }}
         </div>
     @endif
 
-    <!-- Grid Perangkat & Sensor -->
+    <!-- Grid Perangkat & Sensor (Sesuai Proposal Proposal Proyek 2) -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($perangkats as $p)
             @php
@@ -31,7 +38,7 @@
 
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
                 <div>
-                    <!-- Info Perangkat -->
+                    <!-- Info Perangkat & Status Aktif -->
                     <div class="flex justify-between items-start mb-4">
                         <div>
                             <h3 class="font-bold text-gray-800 text-base">{{ $p->nama_perangkat }}</h3>
@@ -45,7 +52,7 @@
                     @if($latestData)
                         <!-- Card Indikator Suhu & Kelembapan -->
                         <div class="grid grid-cols-2 gap-4 mb-4">
-                            <!-- Suhu -->
+                            <!-- Indikator Suhu -->
                             <div class="p-4 rounded-xl border {{ $isSuhuAman ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200' }}">
                                 <span class="text-xs text-gray-500 block mb-1">Suhu Saat Ini</span>
                                 <span class="text-2xl font-bold {{ $isSuhuAman ? 'text-emerald-700' : 'text-red-700' }}">
@@ -54,7 +61,7 @@
                                 <span class="text-[10px] block mt-1 text-gray-500">Ideal: {{ $batangSuhuMin }}°C - {{ $batangSuhuMax }}°C</span>
                             </div>
 
-                            <!-- Kelembapan -->
+                            <!-- Indikator Kelembapan -->
                             <div class="p-4 rounded-xl border bg-blue-50 border-blue-200">
                                 <span class="text-xs text-gray-500 block mb-1">Kelembapan</span>
                                 <span class="text-2xl font-bold text-blue-700">
@@ -64,7 +71,7 @@
                             </div>
                         </div>
 
-                        <!-- Peringatan Jika Suhu Tidak Normal -->
+                        <!-- Peringatan Jika Suhu Keluar Batas Aman -->
                         @if(!$isSuhuAman)
                             <div class="mb-4 p-3 bg-red-100 border border-red-300 text-red-800 rounded-xl text-xs font-medium">
                                 ⚠️ Peringatan: Suhu keluar dari batas aman penyimpanan obat! Segera cek AC/Pendingin ruangan.
