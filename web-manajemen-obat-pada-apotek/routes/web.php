@@ -30,8 +30,13 @@ Route::middleware('auth')->group(function () {
     Route::put('/stok/{id}', [MedicineController::class, 'update'])->name('stok.update');
 
     // Skrining Alergi
-    Route::get('/skrining', [AllergyScreeningController::class, 'index'])->name('skrining.index');
-    Route::get('/skrining/history', [AllergyScreeningController::class, 'history'])->name('skrining.history');
+    Route::get('/skrining',
+        [AllergyScreeningController::class, 'index']
+    )->name('skrining.index');
+
+    Route::get('/skrining/history',
+        [AllergyScreeningController::class, 'history']
+    )->name('skrining.history');
 
     // Monitoring Suhu
     Route::get('/monitoring', [TemperatureMonitoringController::class, 'index'])->name('monitoring.index');

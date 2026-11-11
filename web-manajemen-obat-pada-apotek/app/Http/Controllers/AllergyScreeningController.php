@@ -2,98 +2,182 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Pelanggan;
 use App\Models\AlergiPelanggan;
 use App\Models\Obat;
 use App\Models\ScreeningAlergi;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
-class AllergyScreeningController extends Controller {
-    // Menampilkan halaman skrining beserta hasil instan berdasarkan input teks
-    // Menampilkan riwayat pasien dan alerginya
-    public function history() {
-        $pelanggans = Pelanggan::with('alergis')->latest()->get();
-        return view('skrining.history', compact('pelanggans'));
-    }
-    public function index(Request $request) {
-    $namaPelanggan = $request->input('nama_pelanggan');
-    $namaAlergiInput = $request->input('nama_alergi');
-    $keyword = $request->input('keyword'); // Tangkap input keluhan/indikasi (misal: "Demam")
-    
-    $screeningResults = [];
-    $allergyList = [];
+class AllergyScreeningController extends Controller
+{
+    public function index(Request $request)
+    {
+        $namaPelanggan = trim($request->nama_pelanggan ?? '');
+        $namaAlergiInput = trim($request->nama_alergi ?? '');
+        $keyword = trim($request->keyword ?? '');
 
-    if ($request->has('nama_pelanggan') && !empty($namaPelanggan)) {
-        // Simpan otomatis pelanggan baru atau gunakan yang sudah ada
-        $pelanggan = Pelanggan::firstOrCreate(['nama_pelanggan' => $namaPelanggan]);
+        $allergyList = [];
+        $screeningResults = [];
+        $searched = $request->has('nama_pelanggan') &&
+                    $request->has('keyword');
 
-        // Bersihkan dan simpan riwayat alergi
-        if (!empty($namaAlergiInput)) {
-            $alergis = array_map('trim', explode(',', $namaAlergiInput));
-            foreach ($alergis as $alg) {
-                if (!empty($alg)) {
+        if ($request->filled('nama_pelanggan') && $request->filled('keyword')) {
+
+            // Cari atau buat pelanggan
+            $pelanggan = Pelanggan::firstOrCreate([
+                'nama_pelanggan' => $namaPelanggan
+            ]);
+
+            // Simpan alergi baru tanpa menghapus alergi lama
+            if ($namaAlergiInput !== '') {
+                $daftarAlergi = array_filter(
+                    array_map('trim', explode(',', $namaAlergiInput))
+                );
+
+                foreach ($daftarAlergi as $alergi) {
                     AlergiPelanggan::firstOrCreate([
                         'id_pelanggan' => $pelanggan->id_pelanggan,
-                        'nama_alergi' => $alg
+                        'nama_alergi' => $alergi
                     ]);
                 }
             }
-        }
 
-        $allergyList = $pelanggan->alergis()->pluck('nama_alergi')->toArray();
+            $pelanggan->load('alergis');
 
-        // Query obat dengan filter stok > 0
-        $query = Obat::with('kandungans')->where('stok', '>', 0);
+            $allergyList = $pelanggan->alergis
+                ->pluck('nama_alergi')
+                ->toArray();
 
-        // Jika user mengetik keluhan (misal: "demam"), filter berdasarkan nama obat atau jenis/kategori
-        if (!empty($keyword)) {
-            $query->where(function($q) use ($keyword) {
-                $q->where('nama_obat', 'like', "%{$keyword}%")
-                  ->orWhere('jenis', 'like', "%{$keyword}%");
-            });
-        }
+            // Cari obat berdasarkan nama yang dimasukkan
+            $obats = Obat::with('kandungans')
+                ->where('nama_obat', 'LIKE', '%' . $keyword . '%')
+                ->get();
 
-        $allObats = $query->get();
+            foreach ($obats as $obat) {
 
-        foreach ($allObats as $obat) {
-            $isSafe = true;
-            $matchedAlergiId = null;
+                // Periksa kecocokan kandungan dengan alergi pelanggan
+                $alergiPemicu = null;
 
-            // Cek apakah kandungan obat memicu alergi pasien
-            foreach ($obat->kandungans as $kandungan) {
-                foreach ($pelanggan->alergis as $alergi) {
-                    if (stripos($kandungan->nama_kandungan, $alergi->nama_alergi) !== false) {
-                        $isSafe = false;
-                        $matchedAlergiId = $alergi->id_alergi;
-                        break 2;
+                foreach ($obat->kandungans as $kandungan) {
+                    foreach ($pelanggan->alergis as $alergi) {
+
+                        $namaKandungan = mb_strtolower(
+                            trim($kandungan->nama_kandungan)
+                        );
+
+                        $namaAlergi = mb_strtolower(
+                            trim($alergi->nama_alergi)
+                        );
+
+                        if (
+                            $namaKandungan !== '' &&
+                            $namaAlergi !== '' &&
+                            (
+                                $namaKandungan === $namaAlergi ||
+                                str_contains($namaKandungan, $namaAlergi) ||
+                                str_contains($namaAlergi, $namaKandungan)
+                            )
+                        ) {
+                            $alergiPemicu = $alergi;
+                            break 2;
+                        }
                     }
                 }
-            }
 
-            $hasilText = $isSafe ? 'Aman Digunakan (Alternatif Cocok)' : 'Tidak Aman (Memicu Alergi)';
+                $isSafe = $alergiPemicu === null;
 
-            // Catat ke tabel screening_alergis
-            ScreeningAlergi::updateOrCreate(
-                [
+                $hasil = $isSafe
+                    ? 'AMAN'
+                    : 'TIDAK AMAN - Berpotensi memicu alergi';
+
+                // Simpan setiap pemeriksaan sebagai riwayat baru
+                ScreeningAlergi::create([
                     'id_pelanggan' => $pelanggan->id_pelanggan,
                     'id_obat' => $obat->id_obat,
-                ],
-                [
-                    'id_alergi' => $matchedAlergiId,
-                    'tgl_screening' => Carbon::now(),
-                    'hasil' => $hasilText,
-                ]
-            );
+                    'id_alergi' => $alergiPemicu?->id_alergi,
+                    'tgl_screening' => now(),
+                    'hasil' => $hasil
+                ]);
 
-            $screeningResults[] = [
-                'obat' => $obat,
-                'is_safe' => $isSafe,
-                'hasil' => $hasilText
-            ];
+                // Cari obat alternatif jika obat tidak aman
+                $alternatif = collect();
+
+                if (!$isSafe) {
+                    $alternatif = Obat::with('kandungans')
+                        ->where('jenis', $obat->jenis)
+                        ->where('id_obat', '!=', $obat->id_obat)
+                        ->where('stok', '>', 0)
+                        ->get()
+                        ->filter(function ($obatAlternatif) use ($pelanggan) {
+
+                            foreach ($obatAlternatif->kandungans as $kandungan) {
+                                foreach ($pelanggan->alergis as $alergi) {
+
+                                    $k = mb_strtolower(trim($kandungan->nama_kandungan));
+                                    $a = mb_strtolower(trim($alergi->nama_alergi));
+
+                                    if (
+                                        $k !== '' && $a !== '' &&
+                                        (
+                                            $k === $a ||
+                                            str_contains($k, $a) ||
+                                            str_contains($a, $k)
+                                        )
+                                    ) {
+                                        return false;
+                                    }
+                                }
+                            }
+
+                            return true;
+                        })
+                        ->values();
+                }
+
+                $screeningResults[] = [
+                    'obat' => $obat,
+                    'is_safe' => $isSafe,
+                    'alergi_pemicu' => $alergiPemicu,
+                    'alternatif' => $alternatif
+                ];
+            }
         }
+
+        return view('skrining.index', compact(
+            'namaPelanggan',
+            'namaAlergiInput',
+            'keyword',
+            'allergyList',
+            'screeningResults',
+            'searched'
+        ));
     }
 
-    return view('skrining.index', compact('namaPelanggan', 'namaAlergiInput', 'keyword', 'allergyList', 'screeningResults'));
-}
+    // Menampilkan dan mencari riwayat pelanggan
+    public function history(Request $request)
+    {
+        $search = trim($request->search ?? '');
+
+        $pelanggans = Pelanggan::with([
+            'alergis',
+            'screenings.obat',
+            'screenings.alergi'
+        ])
+        ->when($search, function ($query) use ($search) {
+            $query->where(
+                'nama_pelanggan',
+                'LIKE',
+                '%' . $search . '%'
+            );
+        })
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
+
+        return view('skrining.history', compact(
+            'pelanggans',
+            'search'
+        ));
+    }
 }
