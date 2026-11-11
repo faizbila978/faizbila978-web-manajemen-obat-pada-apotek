@@ -27,15 +27,14 @@ class MedicineController extends Controller {
 
 // Menyimpan obat baru beserta kandungan obatnya
     public function store(Request $request) {
-        dd($request->all());
         $request->validate([
-            'nama_obat' => 'required|string|max:255',
-            'jenis' => 'required|string|max:255',
-            'kategori' => 'required|string|max:255',
-            'kandungan_obat' => 'required|string|max:255', // Validasi input kandungan
-            'alergi' => 'required|string|max:255',
-            'initial_stock' => 'required|integer|min:1',
-            'expired_date' => 'required|date',
+            'nama_obat'      => 'required|string|max:255',
+            'jenis'          => 'required|string|max:255',
+            'kategori'       => 'required|string|max:255',
+            'kandungan_obat' => 'required|string|max:255', // Diubah dari 'kandungan' menjadi 'kandungan_obat'
+            'alergi'         => 'required|string|max:255',
+            'stok'           => 'required|integer|min:1',     // Diubah dari 'initial_stock' menjadi 'stok' sesuai form
+            'expired_date'   => 'required|date',
         ]);
 
         $batchNumber = 'BATCH-' . strtoupper(Str::random(6));
@@ -43,30 +42,30 @@ class MedicineController extends Controller {
         DB::transaction(function () use ($request, $batchNumber) {
             $medicine = Medicine::create([
                 'nama_obat' => $request->nama_obat,
-                'jenis' => $request->jenis,
-                'kategori' => $request->kategori,
-                'alergi' => $request->alergi,
-                'harga' => 0,
-                'stok' => $request->initial_stock,
+                'jenis'     => $request->jenis,
+                'kategori'  => $request->kategori,
+                'alergi'    => $request->alergi,
+                'harga'     => 0,
+                'stok'      => $request->stok, // Mengambil dari input 'stok'
             ]);
 
             // Gunakan $medicine->id (atau sesuaikan jika primary key tabel obat Anda memang id_obat)
             $medicineId = $medicine->id ?? $medicine->id_obat;
 
-            // Simpan kandungan obat
+            // Simpan kandungan obat (Diperbaiki mengambil dari $request->kandungan_obat)
             \App\Models\KandunganObat::create([
-                'id_obat' => $medicineId,
-                'nama_kandungan' => $request->kandungan,
+                'id_obat'        => $medicineId,
+                'nama_kandungan' => $request->kandungan_obat, 
             ]);
 
             MedicineBatch::create([
-                'id_obat' => $medicineId,
-                'batch_number' => $batchNumber,
-                'initial_stock' => $request->initial_stock,
-                'current_stock' => $request->initial_stock,
-                'expired_date' => $request->expired_date,
-                'type' => 'in',
-                'description' => 'Stok Awal',
+                'id_obat'       => $medicineId,
+                'batch_number'  => $batchNumber,
+                'initial_stock' => $request->stok, // Mengambil dari input 'stok'
+                'current_stock' => $request->stok, // Mengambil dari input 'stok'
+                'expired_date'  => $request->expired_date,
+                'type'          => 'in',
+                'description'   => 'Stok Awal',
             ]);
         });
 
