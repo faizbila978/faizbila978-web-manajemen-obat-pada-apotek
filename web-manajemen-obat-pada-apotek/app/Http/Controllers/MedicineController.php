@@ -10,20 +10,25 @@ use Illuminate\Support\Str;
 
 class MedicineController extends Controller {
     // Menampilkan daftar stok obat dan status batch/expired-nya
-   public function index(Request $request) {
+  public function index(Request $request)
+{
     $search = $request->input('search');
 
     $medicines = Medicine::with(['batches' => function($query) {
-        $query->orderBy('expired_date', 'asc');
-    }])
-    ->when($search, function ($query, $search) {
-        // Filter berdasarkan nama obat (menggunakan LIKE agar pencarian lebih fleksibel)
-        return $query->where('nama_obat', 'like', '%' . $search . '%');
-    })
-    ->get();
+                    $query->orderBy('expired_date', 'asc'); // Urutkan batch dari yang terdekat
+                }, 'kandungan'])
+                ->when($search, function($query, $search) {
+                    return $query->where('nama_obat', 'like', "%{$search}%");
+                })
+                // Mengurutkan baris obat utama berdasarkan tanggal expired batch terdekatnya
+                ->get()
+                ->sortBy(function($med) {
+                    $earliestBatch = $med->batches->sortBy('expired_date')->first();
+                    return $earliestBatch ? $earliestBatch->expired_date : '9999-12-31';
+                });
 
     return view('stok.index', compact('medicines'));
-    }
+}
 
 // Menyimpan obat baru beserta kandungan obatnya
     public function store(Request $request) {

@@ -20,7 +20,7 @@
 
             <!-- Tombol Tambah Obat Baru -->
             <button onclick="openModalTambah()" class="bg-[#0d2e26] text-white px-4 py-2 rounded-xl shadow hover:bg-[#133d33] transition font-medium text-sm whitespace-nowrap">
-                + Barang Masuk
+                + Obat Baru
             </button>
         </div>
     </div>
@@ -58,16 +58,15 @@
                 @forelse($medicines as $med)
                 <tr class="hover:bg-gray-50">
                       <!-- Kolom 1: No Batch-->
-                   <td class="p-4 text-gray-800">
-                    @foreach($med->batches as $batch)
+                  <td class="p-4 text-gray-800">
+                    @foreach($med->batches->sortBy('expired_date') as $batch)
                     <div class="mb-1">
-                    <span class="inline-block bg-amber-50 text-amber-800 px-2 py-1 rounded text-xs font-semibold">
-                    {{ $batch->batch_number }}
-                    </span>
+                        <span class="inline-block bg-amber-50 text-amber-800 px-2 py-1 rounded text-xs font-semibold">
+                            {{ $batch->batch_number }}
+                        </span>
                     </div>
                     @endforeach
                     </td>
-
                     <!-- Kolom 2: Nama Obat-->
                     <td class="p-4 font-bold text-gray-800">
                         {{ $med->nama_obat }} <br>
@@ -97,25 +96,42 @@
 
                     <!-- Kolom 6: Total Stok -->
                     <td class="p-4 font-bold text-gray-800">
-                        {{ $med->stok }} <br>
+                    <div class="flex items-center gap-2">
+                        <span class="{{ $med->stok <= 5 ? 'text-amber-600 font-extrabold' : 'text-gray-800' }}">
+                            {{ $med->stok }}
+                        </span>
+
+                        @if($med->stok <= 5 && $med->stok > 0)
+                        <span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                            ⚠️ Stok Menipis
+                        </span>
+                        @elseif($med->stok == 0)
+                        <span class="bg-red-100 text-red-700 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                            ❌ Habis
+                        </span>
+                        @endif
+                    </div>
                     </td>
                     
                     <!-- Kolom 7: Expired -->
                    <td class="p-4 text-gray-800">
-                    @foreach($med->batches as $batch)
+                    @foreach($med->batches->sortBy('expired_date') as $batch)
                     <div class="mb-1 text-xs">
-                    <span>Exp: {{ $batch->expired_date }}</span>
-            
-                    @php
-                    $isExpired = \Carbon\Carbon::parse($batch->expired_date)->isPast();
-                    $isNearExpired = \Carbon\Carbon::parse($batch->expired_date)->lte(now()->addDays(60));
-                    @endphp
+                        @php
+                            $expiredDate = \Carbon\Carbon::parse($batch->expired_date);
+                            $isExpired = $expiredDate->isPast();
+                            $isNearExpired = !$isExpired && $expiredDate->lte(now()->addDays(60));
+                        @endphp
 
-                    @if($isExpired)
-                    <span class="text-red-600 font-bold ml-1">[KADALUARSA]</span>
-                    @elseif($isNearExpired)
-                    <span class="text-amber-600 font-bold ml-1">[Hampir Exp]</span>
-                    @endif
+                        <span class="font-medium {{ $isExpired ? 'text-red-600 font-bold' : ($isNearExpired ? 'text-amber-600 font-bold' : 'text-gray-700') }}">
+                            Exp: {{ $batch->expired_date }}
+                        </span>
+
+                        @if($isExpired)
+                        <span class="bg-red-100 text-red-700 px-1.5 py-0.5 rounded text-[10px] font-bold ml-1">[KADALUARSA]</span>
+                        @elseif($isNearExpired)
+                        <span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[10px] font-bold ml-1">[Hampir Exp]</span>
+                        @endif
                     </div>
                     @endforeach
                     </td>
