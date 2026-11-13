@@ -186,6 +186,8 @@
                         <option value="Salep">Salep</option>
                         <option value="Larutan">Larutan</option>
                         <option value="Inhalasi">Inhalasi</option>
+                        <option value="Koyo">Koyo</option>
+                        <option value="Perban">Perban</option>
                     </select>
                 </div>
 
