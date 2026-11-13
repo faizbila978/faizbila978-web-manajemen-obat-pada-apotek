@@ -6,6 +6,7 @@ use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\AllergyScreeningController;
 use App\Http\Controllers\TemperatureMonitoringController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DataMasterController;
 
 // Auth (hanya untuk tamu / belum login)
 Route::middleware('guest')->group(function () {
@@ -42,6 +43,15 @@ Route::middleware('auth')->group(function () {
     // Monitoring Suhu
     Route::get('/monitoring', [TemperatureMonitoringController::class, 'index'])->name('monitoring.index');
     Route::post('/monitoring/simulate', [TemperatureMonitoringController::class, 'simulateSensor'])->name('monitoring.simulate');
+    Route::get('/monitoring/export', [TemperatureMonitoringController::class, 'export'])->name('monitoring.export');
+     Route::get('/data-master', [DataMasterController::class, 'index'])->name('master.index');
+    Route::post('/data-master/sinkron', [DataMasterController::class, 'sinkron'])->name('master.sinkron');
+    Route::post('/data-master/{tipe}', [DataMasterController::class, 'store'])
+        ->where('tipe', 'kategori|jenis')->name('master.store');
+    Route::put('/data-master/{tipe}/{id}', [DataMasterController::class, 'update'])
+        ->where(['tipe' => 'kategori|jenis', 'id' => '[0-9]+'])->name('master.update');
+    Route::delete('/data-master/{tipe}/{id}', [DataMasterController::class, 'destroy'])
+        ->where(['tipe' => 'kategori|jenis', 'id' => '[0-9]+'])->name('master.destroy');
 
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
