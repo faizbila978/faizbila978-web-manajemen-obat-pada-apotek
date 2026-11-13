@@ -180,8 +180,12 @@
                         <option value="">-- Pilih Jenis Obat --</option>
                         <option value="Tablet">Tablet</option>
                         <option value="Sirup">Sirup</option>
-                        <option value="Pil">Pil</option>
+                        <option value="Kapsul">Kapsul</option>
                         <option value="Bubuk">Bubuk</option>
+                        <option value="Tetes">Tetes</option>
+                        <option value="Salep">Salep</option>
+                        <option value="Larutan">Larutan</option>
+                        <option value="Inhalasi">Inhalasi</option>
                     </select>
                 </div>
 
@@ -190,13 +194,17 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
                     <select name="kategori" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none bg-white">
                         <option value="">-- Pilih Kategori Obat --</option>
-                        <option value="Saluran Pernapasan">Saluran Pernapasan</option>
-                        <option value="Batuk & Flu">Batuk & Flu</option>
-                        <option value="Analgesik & Antipiretik">Analgesik & Antipiretik</option>
-                        <option value="Alergi & Antiinflamasi">Alergi & Antiinflamasi</option>
-                        <option value="Vitamin, Suplemen & Imunomodulator">Vitamin, Suplemen & Imunomodulator</option>
-                        <option value="Kulit">Kulit</option>
-                        <option value="Tetes Mata, Hidung, Telinga">Tetes Mata, Hidung, Telinga</option>
+                        <option value="Obat Pencernaan">Obat Pencernaan</option>
+                        <option value="Obat Demam">Obat Demam</option>
+                        <option value="Obat Batuk">Obat Batuk</option>
+                        <option value="Obat Flu">Obat Flu</option>
+                        <option value="Obat Pereda Nyeri">Obat Pereda Nyeri</option>
+                        <option value="Obat Alergi">Obat Alergi</option>
+                        <option value="Obat Peradangan">Obat Peradangan</option>
+                        <option value="Vitamin & Suplemen">Vitamin & Suplemen</option>
+                        <option value="Obat Luar">Obat Luar</option>
+                        <option value="Obat Tetes">Obat Tetes</option>
+                        <option value="Obat Luka">Obat Luka</option>
                     </select>
                 </div>
 
