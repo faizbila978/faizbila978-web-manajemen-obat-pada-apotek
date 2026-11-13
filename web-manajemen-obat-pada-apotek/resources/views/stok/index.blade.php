@@ -43,7 +43,7 @@
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="bg-gray-100 text-gray-700 text-xs uppercase tracking-wider">
-                    <th class="p-4 font-bold text-gray-800">No. Batch</th>
+                    <th class="p-4 font-bold text-gray-800">ID Obat</th>
                     <th class="p-4 font-bold text-gray-800">Nama Obat</th>
                     <th class="p-4 font-bold text-gray-800">Jenis</th>
                     <th class="p-4 font-bold text-gray-800">Kategori</th>
@@ -57,15 +57,11 @@
             <tbody class="divide-y divide-gray-200 text-base">
                 @forelse($medicines as $med)
                 <tr class="hover:bg-gray-50">
-                      <!-- Kolom 1: No Batch-->
-                  <td class="p-4 text-gray-800">
-                    @foreach($med->batches->sortBy('expired_date') as $batch)
-                    <div class="mb-1">
+                    <!-- Kolom 1: ID Obat -->
+                    <td class="p-4 text-gray-800">
                         <span class="inline-block bg-amber-50 text-amber-800 px-2 py-1 rounded text-xs font-semibold">
-                            {{ $batch->batch_number }}
+                            OBT-{{ str_pad($med->id_obat, 3, '0', STR_PAD_LEFT) }}
                         </span>
-                    </div>
-                    @endforeach
                     </td>
                     <!-- Kolom 2: Nama Obat-->
                     <td class="p-4 font-bold text-gray-800">
@@ -156,7 +152,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="4" class="p-6 text-center text-gray-500">Belum ada data obat atau obat tidak ditemukan.</td>
+                    <td colspan="9" class="p-6 text-center text-gray-500">Belum ada data obat atau obat tidak ditemukan.</td>
                 </tr>
                 @endforelse
             </tbody>
