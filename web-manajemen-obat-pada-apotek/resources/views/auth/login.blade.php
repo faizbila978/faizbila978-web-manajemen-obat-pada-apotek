@@ -4,7 +4,7 @@
 <div class="flex items-center justify-center min-h-screen bg-[#0d2e26] p-6"> <!-- Menggunakan bg hijau tema apotek -->
     <div class="bg-white p-8 rounded-2xl shadow-2xl border border-gray-100 w-full max-w-md">
         <!-- Isi form tetap sama -->
-        <h2 class="text-2xl font-bold text-[#0d2e26] mb-2">Login Pengelola</h2>
+        <h2 class="text-2xl font-bold text-[#0d2e26] mb-2">Login Admin</h2>
         <p class="text-xs text-gray-500 mb-6">Silakan masuk menggunakan akun terdaftar.</p>
 
         @if(session('success'))

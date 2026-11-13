@@ -172,14 +172,34 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nama Obat</label>
                     <input type="text" name="nama_obat" required placeholder="" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
                 </div>
+
+                <!-- Pilihan Jenis (Select Dropdown) -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Jenis</label>
-                    <input type="text" name="jenis" required placeholder="Contoh: Tablet / Botol" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+                    <select name="jenis" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none bg-white">
+                        <option value="">-- Pilih Jenis Obat --</option>
+                        <option value="Tablet">Tablet</option>
+                        <option value="Sirup">Sirup</option>
+                        <option value="Pil">Pil</option>
+                        <option value="Bubuk">Bubuk</option>
+                    </select>
                 </div>
+
+                <!-- Pilihan Kategori (Select Dropdown) -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                    <input type="text" name="kategori" required placeholder="Contoh: Demam / Ruam" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+                    <select name="kategori" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none bg-white">
+                        <option value="">-- Pilih Kategori Obat --</option>
+                        <option value="Saluran Pernapasan">Saluran Pernapasan</option>
+                        <option value="Batuk & Flu">Batuk & Flu</option>
+                        <option value="Analgesik & Antipiretik">Analgesik & Antipiretik</option>
+                        <option value="Alergi & Antiinflamasi">Alergi & Antiinflamasi</option>
+                        <option value="Vitamin, Suplemen & Imunomodulator">Vitamin, Suplemen & Imunomodulator</option>
+                        <option value="Kulit">Kulit</option>
+                        <option value="Tetes Mata, Hidung, Telinga">Tetes Mata, Hidung, Telinga</option>
+                    </select>
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Kandungan Obat</label>
                     <input type="text" name="kandungan_obat" required placeholder="" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
@@ -193,7 +213,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Stok</label>
-                    <input type="number" id="edit_stok" name="stok" min="0" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+                    <input type="number" name="stok" min="0" required placeholder="" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
                 </div>
 
                 <div>
