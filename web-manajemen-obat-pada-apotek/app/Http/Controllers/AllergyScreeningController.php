@@ -50,37 +50,29 @@ class AllergyScreeningController extends Controller
                 ->toArray();
 
             // Cari obat berdasarkan nama yang dimasukkan
-            $obats = Obat::with('kandungans')
-                ->where('nama_obat', 'LIKE', '%' . $keyword . '%')
+            $obats = Obat::where('nama_obat', 'LIKE', '%' . $keyword . '%')
                 ->get();
 
             foreach ($obats as $obat) {
 
-                // Periksa kecocokan kandungan dengan alergi pelanggan
+                // Periksa kecocokan langsung dengan kolom 'alergi' pada tabel obat
                 $alergiPemicu = null;
+                $alergiObatStr = mb_strtolower(trim($obat->alergi ?? ''));
 
-                foreach ($obat->kandungans as $kandungan) {
+                if ($alergiObatStr !== '' && $alergiObatStr !== '-') {
                     foreach ($pelanggan->alergis as $alergi) {
-
-                        $namaKandungan = mb_strtolower(
-                            trim($kandungan->nama_kandungan)
-                        );
-
-                        $namaAlergi = mb_strtolower(
-                            trim($alergi->nama_alergi)
-                        );
+                        $namaAlergiPasien = mb_strtolower(trim($alergi->nama_alergi));
 
                         if (
-                            $namaKandungan !== '' &&
-                            $namaAlergi !== '' &&
+                            $namaAlergiPasien !== '' &&
                             (
-                                $namaKandungan === $namaAlergi ||
-                                str_contains($namaKandungan, $namaAlergi) ||
-                                str_contains($namaAlergi, $namaKandungan)
+                                $alergiObatStr === $namaAlergiPasien ||
+                                str_contains($alergiObatStr, $namaAlergiPasien) ||
+                                str_contains($namaAlergiPasien, $alergiObatStr)
                             )
                         ) {
                             $alergiPemicu = $alergi;
-                            break 2;
+                            break;
                         }
                     }
                 }
@@ -91,7 +83,7 @@ class AllergyScreeningController extends Controller
                     ? 'AMAN'
                     : 'TIDAK AMAN - Berpotensi memicu alergi';
 
-                // Simpan setiap pemeriksaan sebagai riwayat baru
+                // Simpan setiap pemeriksaan sebagai riwayat baru dengan waktu saat ini
                 ScreeningAlergi::create([
                     'id_pelanggan' => $pelanggan->id_pelanggan,
                     'id_obat' => $obat->id_obat,
@@ -100,33 +92,33 @@ class AllergyScreeningController extends Controller
                     'hasil' => $hasil
                 ]);
 
-                // Cari obat alternatif jika obat tidak aman
+                // Cari obat alternatif berdasarkan KATEGORI yang sama
                 $alternatif = collect();
 
                 if (!$isSafe) {
-                    $alternatif = Obat::with('kandungans')
-                        ->where('jenis', $obat->jenis)
+                    $alternatif = Obat::where('kategori', $obat->kategori)
                         ->where('id_obat', '!=', $obat->id_obat)
                         ->where('stok', '>', 0)
                         ->get()
                         ->filter(function ($obatAlternatif) use ($pelanggan) {
+                            $altAlergiStr = mb_strtolower(trim($obatAlternatif->alergi ?? ''));
 
-                            foreach ($obatAlternatif->kandungans as $kandungan) {
-                                foreach ($pelanggan->alergis as $alergi) {
+                            if ($altAlergiStr === '' || $altAlergiStr === '-') {
+                                return true; 
+                            }
 
-                                    $k = mb_strtolower(trim($kandungan->nama_kandungan));
-                                    $a = mb_strtolower(trim($alergi->nama_alergi));
+                            foreach ($pelanggan->alergis as $alergi) {
+                                $a = mb_strtolower(trim($alergi->nama_alergi));
 
-                                    if (
-                                        $k !== '' && $a !== '' &&
-                                        (
-                                            $k === $a ||
-                                            str_contains($k, $a) ||
-                                            str_contains($a, $k)
-                                        )
-                                    ) {
-                                        return false;
-                                    }
+                                if (
+                                    $a !== '' &&
+                                    (
+                                        $altAlergiStr === $a ||
+                                        str_contains($altAlergiStr, $a) ||
+                                        str_contains($a, $altAlergiStr)
+                                    )
+                                ) {
+                                    return false; 
                                 }
                             }
 

@@ -115,7 +115,12 @@
                                     {{ $res['obat']->nama_obat }}
                                 </h4>
 
+                                <!-- Tambahan Kategori Obat Utama -->
                                 <p class="text-xs text-gray-500 mt-1">
+                                    Kategori: {{ $res['obat']->kategori }}
+                                </p>
+
+                                <p class="text-xs text-gray-500">
                                     Jenis: {{ $res['obat']->jenis }}
                                 </p>
 
@@ -160,7 +165,7 @@
                             <div class="mt-4">
 
                                 <h5 class="font-bold text-sm text-[#0d2e26] mb-2">
-                                    Rekomendasi Obat Alternatif
+                                    Rekomendasi Obat Alternatif (Kategori yang Sama)
                                 </h5>
 
                                 @forelse($res['alternatif'] as $alternatif)
@@ -177,7 +182,12 @@
                                             </span>
                                         </div>
 
+                                        <!-- Tambahan Kategori Obat Alternatif -->
                                         <p class="text-xs text-gray-600 mt-1">
+                                            Kategori: {{ $alternatif->kategori }}
+                                        </p>
+
+                                        <p class="text-xs text-gray-600">
                                             Jenis: {{ $alternatif->jenis }}
                                         </p>
 
@@ -197,7 +207,7 @@
                                 @empty
 
                                     <p class="text-xs text-gray-500">
-                                        Belum ditemukan obat alternatif sejenis
+                                        Belum ditemukan obat alternatif dengan kategori yang sama
                                         yang lolos pencocokan alergi dan memiliki stok.
                                     </p>
 
