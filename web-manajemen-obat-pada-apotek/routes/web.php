@@ -27,6 +27,7 @@ Route::middleware('auth')->group(function () {
         ->parameters(['stok' => 'id_obat']);
     
     Route::post('/stok/reduce', [MedicineController::class, 'reduceStock'])->name('stok.reduce');
+    Route::post('/stok/restock', [MedicineController::class, 'restock'])->name('stok.restock');
     Route::put('/stok/{id}', [MedicineController::class, 'update'])->name('stok.update');
 
     // Skrining Alergi

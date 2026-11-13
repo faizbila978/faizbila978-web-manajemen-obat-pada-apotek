@@ -2,7 +2,6 @@
 <aside class="w-64 min-h-screen bg-gradient-to-br from-[#0F766E] to-[#15803D] text-white p-4 flex flex-col gap-2 shadow-xl">
     <!-- Brand / Logo Area -->
     <div class="px-4 py-3 mb-4 font-bold text-xl tracking-wide flex items-center gap-2">
-        <div class="w-2.5 h-6 bg-white/80 rounded-full"></div>
         <span>Apotek Farmasi 57</span>
     </div>
 
