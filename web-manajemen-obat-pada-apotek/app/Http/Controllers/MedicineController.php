@@ -12,21 +12,31 @@ class MedicineController extends Controller {
     // Menampilkan daftar stok obat dan status batch/expired-nya
   public function index(Request $request)
 {
-    $search = $request->input('search');
+   $search = trim((string) $request->input('search'));
 
-    $medicines = Medicine::with(['batches' => function($query) {
-                    $query->orderBy('expired_date', 'asc'); // Urutkan batch dari yang terdekat
-                }, 'kandungan'])
-                ->when($search, function($query, $search) {
-                    return $query->where('nama_obat', 'like', "%{$search}%");
-                })
-                // Mengurutkan baris obat utama berdasarkan tanggal expired batch terdekatnya
-                ->get()
-                ->sortBy(function($med) {
-                    $earliestBatch = $med->batches->sortBy('expired_date')->first();
-                    return $earliestBatch ? $earliestBatch->expired_date : '9999-12-31';
-                });
+    $medicines = Medicine::with(['batches' => function ($query) {
+            $query->orderBy('expired_date', 'asc');
+        }, 'kandungan'])
+        ->when($search !== '', function ($query) use ($search) {
+            $angkaId = preg_replace('/[^0-9]/', '', $search);
 
+            $query->where(function ($q) use ($search, $angkaId) {
+                // Cari berdasarkan nama obat
+                $q->where('nama_obat', 'like', "%{$search}%");
+
+                // Cari berdasarkan ID obat (misal OBT-043 -> 43 / 043)
+                if ($angkaId !== '') {
+                    $idTanpaNol = (int) ltrim($angkaId, '0');
+                    $q->orWhere('id_obat', $idTanpaNol)
+                    ->orWhere('id_obat', $angkaId);
+                }
+            });
+    })
+    ->get()
+    ->sortBy(function ($med) {
+        $earliestBatch = $med->batches->sortBy('expired_date')->first();
+        return $earliestBatch ? $earliestBatch->expired_date : '9999-12-31';
+    });
     return view('stok.index', compact('medicines'));
 }
 

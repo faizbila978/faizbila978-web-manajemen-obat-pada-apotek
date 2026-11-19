@@ -6,7 +6,7 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-[#0d2e26]">Data Master</h1>
+            <h1 class="text-2xl font-bold text-[#0d2e26]">Pengaturan</h1>
             <p class="text-sm text-gray-500 mt-1">Daftar kategori dan jenis obat yang dipakai di form Stok & Mutasi.</p>
         </div>
         <form action="{{ route('master.sinkron') }}" method="POST">

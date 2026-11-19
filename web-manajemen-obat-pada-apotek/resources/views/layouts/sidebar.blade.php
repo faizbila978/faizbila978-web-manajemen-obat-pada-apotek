@@ -28,16 +28,6 @@
             @endif
         </a>
 
-        <!-- Data Master (Kategori & Jenis) -->
-        <a href="{{ route('master.index') }}" 
-           class="flex items-center justify-between px-4 py-3 rounded-2xl font-medium transition-all duration-200 
-           {{ request()->routeIs('master.*') ? 'bg-white text-[#0F766E] shadow-md' : 'text-emerald-100 hover:bg-white/10' }}">
-            <span>Data Master</span>
-            @if(request()->routeIs('master.*'))
-                <span class="w-2 h-2 rounded-full bg-[#15803D]"></span>
-            @endif
-        </a>
-
         <!-- Penjualan (termasuk skrining alergi) -->
         <a href="{{ route('penjualan.index') }}" 
            class="flex items-center justify-between px-4 py-3 rounded-2xl font-medium transition-all duration-200 
@@ -54,6 +44,16 @@
            {{ request()->routeIs('monitoring.*') ? 'bg-white text-[#0F766E] shadow-md' : 'text-emerald-100 hover:bg-white/10' }}">
             <span>Monitoring</span>
             @if(request()->routeIs('monitoring.*'))
+                <span class="w-2 h-2 rounded-full bg-[#15803D]"></span>
+            @endif
+        </a>
+
+        <!-- Data Master (Kategori & Jenis) -->
+        <a href="{{ route('master.index') }}" 
+           class="flex items-center justify-between px-4 py-3 rounded-2xl font-medium transition-all duration-200 
+           {{ request()->routeIs('master.*') ? 'bg-white text-[#0F766E] shadow-md' : 'text-emerald-100 hover:bg-white/10' }}">
+            <span>Pengaturan</span>
+            @if(request()->routeIs('master.*'))
                 <span class="w-2 h-2 rounded-full bg-[#15803D]"></span>
             @endif
         </a>
