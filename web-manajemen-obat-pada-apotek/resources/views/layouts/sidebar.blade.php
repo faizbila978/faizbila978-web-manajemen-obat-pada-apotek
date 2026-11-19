@@ -38,12 +38,12 @@
             @endif
         </a>
 
-        <!-- Skrining Alergi -->
-        <a href="{{ route('skrining.index') }}" 
+        <!-- Penjualan (termasuk skrining alergi) -->
+        <a href="{{ route('penjualan.index') }}" 
            class="flex items-center justify-between px-4 py-3 rounded-2xl font-medium transition-all duration-200 
-           {{ request()->routeIs('skrining.*') ? 'bg-white text-[#0F766E] shadow-md' : 'text-emerald-100 hover:bg-white/10' }}">
-            <span>Skrining Alergi</span>
-            @if(request()->routeIs('skrining.*'))
+           {{ request()->routeIs('penjualan.*') ? 'bg-white text-[#0F766E] shadow-md' : 'text-emerald-100 hover:bg-white/10' }}">
+            <span>Penjualan</span>
+            @if(request()->routeIs('penjualan.*'))
                 <span class="w-2 h-2 rounded-full bg-[#15803D]"></span>
             @endif
         </a>

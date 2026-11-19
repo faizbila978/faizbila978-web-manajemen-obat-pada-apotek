@@ -5,7 +5,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class ScreeningAlergi extends Model {
     protected $primaryKey = 'id_screening';
-    protected $fillable = ['id_pelanggan', 'id_obat', 'id_alergi', 'id_pengelola', 'tgl_screening', 'hasil'];
+    protected $fillable = [
+        'id_pelanggan', 'id_obat', 'id_alergi', 'id_pengelola', 'tgl_screening', 'hasil',
+        'status', 'alergi_input', 'temuan', 'disetujui_oleh', 'catatan_apoteker', 'id_penjualan',
+    ];
+
+    protected $casts = [
+        'tgl_screening' => 'datetime',
+        'temuan' => 'array',
+    ];
 
     public function pelanggan() {
         return $this->belongsTo(Pelanggan::class, 'id_pelanggan', 'id_pelanggan');

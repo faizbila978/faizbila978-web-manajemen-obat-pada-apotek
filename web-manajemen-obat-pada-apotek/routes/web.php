@@ -7,6 +7,7 @@ use App\Http\Controllers\AllergyScreeningController;
 use App\Http\Controllers\TemperatureMonitoringController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DataMasterController;
+use App\Http\Controllers\PenjualanController;
 
 // Auth (hanya untuk tamu / belum login)
 Route::middleware('guest')->group(function () {
@@ -32,13 +33,16 @@ Route::middleware('auth')->group(function () {
     Route::put('/stok/{id}', [MedicineController::class, 'update'])->name('stok.update');
 
     // Skrining Alergi
-    Route::get('/skrining',
-        [AllergyScreeningController::class, 'index']
-    )->name('skrining.index');
+    Route::redirect('/skrining', '/penjualan')->name('skrining.index');
+    Route::redirect('/skrining/history', '/penjualan')->name('skrining.history');
 
-    Route::get('/skrining/history',
-        [AllergyScreeningController::class, 'history']
-    )->name('skrining.history');
+    //penjualan
+    Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
+    Route::get('/penjualan/cari-obat', [PenjualanController::class, 'cariObat'])->name('penjualan.cari');
+    Route::post('/penjualan/skrining', [PenjualanController::class, 'skrining'])->name('penjualan.skrining');
+    Route::post('/penjualan/skrining/{id}/setujui', [PenjualanController::class, 'setujui'])
+        ->whereNumber('id')->name('penjualan.setujui');
+    Route::post('/penjualan/bayar', [PenjualanController::class, 'bayar'])->name('penjualan.bayar');
 
     // Monitoring Suhu
     Route::get('/monitoring', [TemperatureMonitoringController::class, 'index'])->name('monitoring.index');
