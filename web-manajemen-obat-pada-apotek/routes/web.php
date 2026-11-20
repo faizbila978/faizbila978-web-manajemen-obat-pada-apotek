@@ -47,6 +47,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/monitoring', [TemperatureMonitoringController::class, 'index'])->name('monitoring.index');
     Route::post('/monitoring/simulate', [TemperatureMonitoringController::class, 'simulateSensor'])->name('monitoring.simulate');
     Route::get('/monitoring/export', [TemperatureMonitoringController::class, 'export'])->name('monitoring.export');
+    Route::put('/monitoring/batas', [TemperatureMonitoringController::class, 'updateBatas'])->name('monitoring.batas.update');
+
+    // Data Master
     Route::get('/data-master', [DataMasterController::class, 'index'])->name('master.index');
     Route::post('/data-master/sinkron', [DataMasterController::class, 'sinkron'])->name('master.sinkron');
     Route::post('/data-master/{tipe}', [DataMasterController::class, 'store'])

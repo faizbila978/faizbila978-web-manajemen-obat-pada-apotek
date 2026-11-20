@@ -34,7 +34,7 @@ class TemperatureMonitoringController extends Controller
             return view('monitoring.index', ['perangkat' => null, 'perangkats' => $perangkats]);
         }
 
-        $batas  = $this->batas($perangkat);
+        $batas   = $this->batas($perangkat);
         $rentang = in_array($request->input('rentang'), ['hari', 'minggu', 'bulan'], true)
             ? $request->input('rentang') : 'hari';
 
@@ -100,6 +100,37 @@ class TemperatureMonitoringController extends Controller
         ]);
     }
 
+    // Simpan perubahan batas minimum & maksimum suhu dan kelembapan
+    public function updateBatas(Request $request)
+    {
+        $validated = $request->validate([
+            'id_perangkat' => ['required', 'integer', 'exists:perangkats,id_perangkat'],
+            'suhu_min'     => ['required', 'numeric', 'lt:suhu_max'],
+            'suhu_max'     => ['required', 'numeric', 'gt:suhu_min'],
+            'lembap_min'   => ['required', 'numeric', 'min:0', 'max:100', 'lt:lembap_max'],
+            'lembap_max'   => ['required', 'numeric', 'min:0', 'max:100', 'gt:lembap_min'],
+        ], [
+            'suhu_min.lt'   => 'Batas minimum suhu harus lebih kecil dari batas maksimum suhu.',
+            'suhu_max.gt'   => 'Batas maksimum suhu harus lebih besar dari batas minimum suhu.',
+            'lembap_min.lt' => 'Batas minimum kelembapan harus lebih kecil dari batas maksimum kelembapan.',
+            'lembap_max.gt' => 'Batas maksimum kelembapan harus lebih besar dari batas minimum kelembapan.',
+        ]);
+
+        PengaturanBatasan::updateOrCreate(
+            ['id_perangkat' => $validated['id_perangkat']],
+            [
+                'suhu_minimal'    => $validated['suhu_min'],
+                'suhu_maksimal'   => $validated['suhu_max'],
+                'lembap_minimal'  => $validated['lembap_min'],
+                'lembap_maksimal' => $validated['lembap_max'],
+            ]
+        );
+
+        return redirect()
+            ->route('monitoring.index', ['lokasi' => $validated['id_perangkat']])
+            ->with('success', 'Pengaturan batas minimum & maksimum berhasil diperbarui.');
+    }
+
     // Unduh seluruh riwayat sebagai CSV (bisa dibuka di Excel)
     public function export(Request $request)
     {
@@ -131,7 +162,7 @@ class TemperatureMonitoringController extends Controller
         }, $nama, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
-    // Simulasi data sensor (tidak diubah dari versi awal)
+    // Simulasi data sensor
     public function simulateSensor(Request $request)
     {
         $perangkats = Perangkat::all();
@@ -157,7 +188,7 @@ class TemperatureMonitoringController extends Controller
         foreach ($perangkats as $p) {
             DataSensor::create([
                 'id_perangkat' => $p->id_perangkat,
-                'suhu' => rand(140, 320) / 10, // 14,0 - 32,0 °C agar bisa melewati batas 15 dan 30
+                'suhu' => rand(140, 320) / 10,
                 'kelembapan' => rand(450, 650) / 10,
                 'waktu_catat' => Carbon::now(),
             ]);
