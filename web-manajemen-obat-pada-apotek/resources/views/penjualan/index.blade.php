@@ -796,7 +796,10 @@ function tampilkanStruk(d) {
         <div class="text-center border-b pb-3 mb-3">
             <h3 class="text-lg font-bold text-[#0d2e26]">Apotek Farmasi 57</h3>
             <p class="text-xs text-gray-500">Struk Pembayaran</p>
-            <p class="text-xs text-gray-500 mt-1">${esc(d.no_transaksi)} &bull; ${esc(d.waktu)}</p>
+            <p class="text-xs text-gray-500 mt-1">
+                ${esc(d.no_transaksi)} &bull;
+                <span id="waktuCetakStruk"></span>
+            </p>
         </div>
         <div class="divide-y text-sm border-b pb-2 mb-3">
             ${d.items.map(i => `
@@ -822,6 +825,21 @@ function tampilkanStruk(d) {
 }
 
 function cetakStruk() {
+    const sekarang = new Date();
+
+    const waktu = sekarang.toLocaleString('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+
+    document.getElementById('waktuCetakStruk').textContent = waktu;
+
     window.print();
 }
 </script>
