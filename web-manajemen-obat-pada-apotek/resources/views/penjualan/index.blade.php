@@ -45,7 +45,7 @@
                     <div class="relative">
                         <label for="namaObat" class="block text-sm font-medium mb-1">Nama Obat</label>
                         <input id="namaObat" type="text" autocomplete="off"
-                            placeholder="Ketik nama obat, lalu pilih dari daftar"
+                            placeholder="...."
                             class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
 
                         <ul id="saranObat" class="hidden absolute z-20 left-0 right-0 mt-1 bg-white border rounded-xl shadow-lg max-h-64 overflow-y-auto"></ul>
@@ -53,13 +53,15 @@
                         <p id="infoCari" class="hidden text-xs mt-1"></p>
                     </div>
 
-                    <div>
+                    <div class="relative">
                         <label for="alergi" class="block text-sm font-medium mb-1">
                             Riwayat Alergi Pelanggan
                         </label>
                         <input id="alergi" type="text" maxlength="500" autocomplete="off"
-                            placeholder="Contoh: Penisilin, Aspirin"
+                            placeholder="...."
                             class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-[#0d2e26] outline-none">
+
+                        <ul id="saranAlergi" class="hidden absolute z-20 left-0 right-0 mt-1 bg-white border rounded-xl shadow-lg max-h-56 overflow-y-auto"></ul>
                     </div>
 
                     <div id="errSkrining" class="hidden p-3 bg-red-50 border border-red-200 text-red-800 rounded-xl text-sm"></div>
@@ -82,7 +84,7 @@
                 <div class="flex gap-2 border-b mb-4 pb-3">
                     <button type="button" id="tabDaftar"
                         class="px-3 py-2 rounded-lg text-sm font-semibold bg-[#0d2e26] text-white">
-                        Daftar Penjualan
+                        Transaksi
                     </button>
 
                     <button type="button" id="btnBukaRiwayat"
@@ -94,7 +96,7 @@
                 <!-- DAFTAR PENJUALAN -->
                 <div id="panelDaftar">
                     <div class="flex items-center justify-between mb-3">
-                        <h2 class="font-semibold text-[#0d2e26]">Daftar Penjualan</h2>
+                        <h2 class="font-semibold text-[#0d2e26]">Transaksi</h2>
                         <button type="button" id="btnKosongkan"
                             class="hidden text-xs text-red-600 hover:underline">
                             Kosongkan
@@ -352,12 +354,14 @@ const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '{{ c
 let obatDipilih = null;
 let keranjang = [];
 let timerCari = null;
+let timerAlergi = null;
 
 const elNamaObat = document.getElementById('namaObat');
 const elSaranObat = document.getElementById('saranObat');
 const elObatTerpilih = document.getElementById('obatTerpilih');
 const elInfoCari = document.getElementById('infoCari');
 const elAlergi = document.getElementById('alergi');
+const elSaranAlergi = document.getElementById('saranAlergi');
 const elErrSkrining = document.getElementById('errSkrining');
 const elBtnSkrining = document.getElementById('btnSkrining');
 const elHasilSkrining = document.getElementById('hasilSkrining');
@@ -474,9 +478,60 @@ elSaranObat.addEventListener('click', e => {
     elSaranObat.classList.add('hidden');
 });
 
+// Tarik Riwayat Alergi dari Database saat Mengetik
+elAlergi.addEventListener('input', () => {
+    clearTimeout(timerAlergi);
+
+    const bagian = elAlergi.value.split(',');
+    const kataTerakhir = bagian[bagian.length - 1].trim();
+
+    if (kataTerakhir.length < 1) {
+        elSaranAlergi.classList.add('hidden');
+        return;
+    }
+
+    timerAlergi = setTimeout(async () => {
+        const res = await fetch(`{{ route('penjualan.cari-alergi') }}?q=${encodeURIComponent(kataTerakhir)}`);
+        const items = await res.json();
+
+        if (!Array.isArray(items) || !items.length) {
+            elSaranAlergi.classList.add('hidden');
+            return;
+        }
+
+        elSaranAlergi.innerHTML = items.map(nama => `
+            <li data-alergi="${esc(nama)}"
+                class="px-4 py-2 hover:bg-emerald-50 cursor-pointer text-sm text-[#0d2e26] flex items-center justify-between">
+                <span>${esc(nama)}</span>
+                <span class="text-[11px] text-gray-400">Database</span>
+            </li>
+        `).join('');
+        elSaranAlergi.classList.remove('hidden');
+    }, 180);
+});
+
+elSaranAlergi.addEventListener('click', e => {
+    const li = e.target.closest('li[data-alergi]');
+    if (!li) return;
+
+    const dipilih = li.dataset.alergi;
+    const bagian = elAlergi.value.split(',').map(s => s.trim()).filter(Boolean);
+    if (bagian.length > 0 && !elAlergi.value.trim().endsWith(',')) {
+        bagian[bagian.length - 1] = dipilih;
+    } else {
+        bagian.push(dipilih);
+    }
+
+    elAlergi.value = bagian.join(', ');
+    elSaranAlergi.classList.add('hidden');
+});
+
 document.addEventListener('click', e => {
     if (!e.target.closest('#namaObat') && !e.target.closest('#saranObat')) {
         elSaranObat.classList.add('hidden');
+    }
+    if (!e.target.closest('#alergi') && !e.target.closest('#saranAlergi')) {
+        elSaranAlergi.classList.add('hidden');
     }
 });
 

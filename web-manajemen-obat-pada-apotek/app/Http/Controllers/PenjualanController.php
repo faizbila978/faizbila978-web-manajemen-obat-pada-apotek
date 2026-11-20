@@ -53,6 +53,28 @@ class PenjualanController extends Controller
         );
     }
 
+    // Tarik data alergi dari database saat mengetik riwayat alergi
+    public function cariAlergi(Request $request)
+    {
+        $q = trim((string)$request->query('q'));
+
+        if (mb_strlen($q) < 1) {
+            return response()->json([]);
+        }
+
+        $rows = DB::table('alergi_pelanggans')
+            ->select('nama_alergi')
+            ->whereNotNull('nama_alergi')
+            ->where('nama_alergi', '!=', '')
+            ->where('nama_alergi', 'like', '%' . $q . '%')
+            ->distinct()
+            ->orderBy('nama_alergi')
+            ->limit(8)
+            ->pluck('nama_alergi');
+
+        return response()->json($rows);
+    }
+
     // Proses skrining alergi
     public function skrining(Request $request, SkriningAlergiService$svc)
     {
@@ -240,14 +262,14 @@ class PenjualanController extends Controller
                 ->count() + 1;
 
             $penjualan = Penjualan::create([
-                'no_transaksi' => $awal . str_pad((string) $urut, 4, '0', STR_PAD_LEFT),
-                'id_pelanggan' => $screenings->first()->id_pelanggan,
-                'id_pengelola' => auth()->id(),
-                'total'        => $total,
-                'metode_bayar' => $data['metode_bayar'],
-                'dibayar'      => $dibayar,
-                'kembalian'    => $dibayar -$total,
-                'tgl_transaksi'=> now(),
+                'no_transaksi'  => $awal . str_pad((string) $urut, 4, '0', STR_PAD_LEFT),
+                'id_pelanggan'  => $screenings->first()->id_pelanggan,
+                'id_pengelola'  => auth()->id(),
+                'total'         => $total,
+                'metode_bayar'  => $data['metode_bayar'],
+                'dibayar'       => $dibayar,
+                'kembalian'     => $dibayar -$total,
+                'tgl_transaksi' => now(),
             ]);
 
             foreach ($baris as$b) {

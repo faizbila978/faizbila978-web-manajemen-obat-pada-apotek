@@ -39,16 +39,15 @@ Route::middleware('auth')->group(function () {
     //penjualan
     Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
     Route::get('/penjualan/cari-obat', [PenjualanController::class, 'cariObat'])->name('penjualan.cari');
+    Route::get('/penjualan/cari-alergi', [PenjualanController::class, 'cariAlergi'])->name('penjualan.cari-alergi');
     Route::post('/penjualan/skrining', [PenjualanController::class, 'skrining'])->name('penjualan.skrining');
-    Route::post('/penjualan/skrining/{id}/setujui', [PenjualanController::class, 'setujui'])
-        ->whereNumber('id')->name('penjualan.setujui');
     Route::post('/penjualan/bayar', [PenjualanController::class, 'bayar'])->name('penjualan.bayar');
 
     // Monitoring Suhu
     Route::get('/monitoring', [TemperatureMonitoringController::class, 'index'])->name('monitoring.index');
     Route::post('/monitoring/simulate', [TemperatureMonitoringController::class, 'simulateSensor'])->name('monitoring.simulate');
     Route::get('/monitoring/export', [TemperatureMonitoringController::class, 'export'])->name('monitoring.export');
-     Route::get('/data-master', [DataMasterController::class, 'index'])->name('master.index');
+    Route::get('/data-master', [DataMasterController::class, 'index'])->name('master.index');
     Route::post('/data-master/sinkron', [DataMasterController::class, 'sinkron'])->name('master.sinkron');
     Route::post('/data-master/{tipe}', [DataMasterController::class, 'store'])
         ->where('tipe', 'kategori|jenis')->name('master.store');
